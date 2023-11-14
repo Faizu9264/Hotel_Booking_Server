@@ -15,22 +15,46 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DefaultUserUseCase = void 0;
 const userRepository_1 = __importDefault(require("../infrastructure/database/repositories/userRepository"));
 const authUtils_1 = require("../infrastructure/utils/authUtils");
+const defaultOTPService_1 = require("./otp/defaultOTPService");
+const defaultOTPRepository_1 = __importDefault(require("./otp/defaultOTPRepository"));
 class DefaultUserUseCase {
-    signUp(user) {
+    constructor() {
+        const otpRepository = new defaultOTPRepository_1.default();
+        this.otpService = new defaultOTPService_1.DefaultOTPService(otpRepository);
+    }
+    sendOTP(email) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const otp = this.otpService.generateOTP();
+            this.otpService.storeOTP(email, otp);
+            yield this.otpService.sendOTP(email, otp);
+            return { message: 'OTP sent successfully' };
+        });
+    }
+    verifyOTP(email, userEnteredOTP) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const storedOTP = this.otpService.getStoredOTP(email);
+            return storedOTP === userEnteredOTP;
+        });
+    }
+    createUserAfterVerification(user) {
         return __awaiter(this, void 0, void 0, function* () {
             const hashedPassword = yield (0, authUtils_1.hashPassword)(user.password);
             const newUser = yield userRepository_1.default.create(Object.assign(Object.assign({}, user), { password: hashedPassword }));
-            // Generate access and refresh tokens
-            const accessToken = (0, authUtils_1.generateAccessToken)(newUser);
-            const refreshToken = (0, authUtils_1.generateRefreshToken)(newUser);
-            return { accessToken, refreshToken };
+            return { message: 'Signup successful' };
+        });
+    }
+    signUp(user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const otp = this.otpService.generateOTP();
+            this.otpService.storeOTP(user.email, otp);
+            this.otpService.sendOTP(user.email, otp);
+            return { message: 'OTP sent for verification' };
         });
     }
     login(email, password) {
         return __awaiter(this, void 0, void 0, function* () {
             const existingUser = yield userRepository_1.default.findOne({ email });
             if (existingUser && (yield (0, authUtils_1.comparePasswords)(password, existingUser.password))) {
-                // Generate access and refresh tokens
                 const accessToken = (0, authUtils_1.generateAccessToken)(existingUser);
                 const refreshToken = (0, authUtils_1.generateRefreshToken)(existingUser);
                 return { accessToken, refreshToken };

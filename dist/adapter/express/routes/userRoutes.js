@@ -8,5 +8,6 @@ const express_1 = __importDefault(require("express"));
 const userController_1 = require("../controllers/userController");
 const router = express_1.default.Router();
 router.post('/signup', userController_1.signUpController);
+router.post('/verify-otp', userController_1.verifyOTPController);
 router.post('/login', userController_1.loginController);
 exports.default = router;

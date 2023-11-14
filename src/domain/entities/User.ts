@@ -2,7 +2,7 @@
 import { Document, Schema, model } from 'mongoose';
 
 export interface User {
-  _id?: string; // Make _id optional
+  _id?: string; 
   username: string;
   email: string;
   password: string;

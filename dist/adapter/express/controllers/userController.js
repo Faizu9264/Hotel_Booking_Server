@@ -8,15 +8,22 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.loginController = exports.signUpController = void 0;
+exports.loginController = exports.verifyOTPController = exports.signUpController = void 0;
 const userUseCase_1 = require("../../../usecase/userUseCase");
+const defaultOTPService_1 = require("../../../usecase/otp/defaultOTPService");
+const defaultOTPRepository_1 = __importDefault(require("../../../usecase/otp/defaultOTPRepository"));
+const otpRepository = new defaultOTPRepository_1.default();
+const otpService = new defaultOTPService_1.DefaultOTPService(otpRepository);
 const signUpController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { username, email, password } = req.body;
         const userUseCase = new userUseCase_1.DefaultUserUseCase();
-        yield userUseCase.signUp({ username, email, password });
-        res.status(201).json({ message: 'Signup successful' });
+        yield userUseCase.sendOTP(email);
+        res.status(200).json({ message: 'OTP sent successfully' });
     }
     catch (error) {
         console.error('Error in signUpController:', error);
@@ -24,6 +31,26 @@ const signUpController = (req, res) => __awaiter(void 0, void 0, void 0, functio
     }
 });
 exports.signUpController = signUpController;
+const verifyOTPController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { email, otp } = req.body;
+        const userUseCase = new userUseCase_1.DefaultUserUseCase();
+        const isOTPValid = yield userUseCase.verifyOTP(email, otp);
+        if (isOTPValid) {
+            const { username, password } = req.body;
+            yield userUseCase.createUserAfterVerification({ username, email, password });
+            res.status(201).json({ message: 'Signup successful' });
+        }
+        else {
+            res.status(401).json({ error: 'Invalid OTP' });
+        }
+    }
+    catch (error) {
+        console.error('Error in verifyOTPController:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+exports.verifyOTPController = verifyOTPController;
 const loginController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { email, password } = req.body;
