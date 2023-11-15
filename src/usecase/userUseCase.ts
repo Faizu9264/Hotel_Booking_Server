@@ -14,31 +14,42 @@ export class DefaultUserUseCase {
   }
 
   async sendOTP(email: string): Promise<{ message: string }> {
-    const otp = this.otpService.generateOTP();
-    this.otpService.storeOTP(email, otp);
-    await this.otpService.sendOTP(email, otp);
-
+    const otp = await this.otpService.sendOTP(email);
     return { message: 'OTP sent successfully' };
   }
 
   async verifyOTP(email: string, userEnteredOTP: string): Promise<boolean> {
     const storedOTP = this.otpService.getStoredOTP(email);
+    console.log(storedOTP,'storedOTP');
     return storedOTP === userEnteredOTP;
   }
 
   async createUserAfterVerification(user: Omit<UserDocument, '_id'>): Promise<{ message: string }> {
-    const hashedPassword = await hashPassword(user.password);
-    const newUser = await UserRepository.create({ ...user, password: hashedPassword });
-    return { message: 'Signup successful' };
+    try {
+      console.log('User before hashing password:', user);
+      const hashedPassword = await hashPassword(user.password);
+      console.log('Hashed Password:', hashedPassword);
+      const newUser = await UserRepository.create({ ...user, password: hashedPassword });
+      console.log('New User Created:', newUser);
+      return { message: 'Signup successful' };
+    } catch (error) {
+      console.error('Error creating user after verification:', error);
+      throw error;
+    }
   }
+  
   async signUp(user: Omit<UserDocument, '_id'>): Promise<{ message: string }> {
-    const otp = this.otpService.generateOTP();
-    this.otpService.storeOTP(user.email, otp);
-  
-    this.otpService.sendOTP(user.email, otp);
-  
-    return { message: 'OTP sent for verification' };
+    try {
+      const otp = await this.otpService.sendOTP(user.email);
+      console.log('OTP sent for verification:', otp);
+      return { message: 'OTP sent for verification' };
+    } catch (error) {
+      console.error('Error sending OTP:', error);
+      throw new Error('Error sending OTP');
+    }
   }
+  
+  
 
   async login(email: string, password: string): Promise<{ accessToken: string; refreshToken: string } | null> {
     const existingUser = await UserRepository.findOne({ email });

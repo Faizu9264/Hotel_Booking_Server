@@ -30,37 +30,59 @@ export class DefaultOTPService implements OTPService {
     return generatedOTP;
   }
 
-  sendOTP(email: string, otp: string): void {
-       console.log(transporter,'transporter');
-    
-    console.log(email,'sending otp to email');
-    
-    const mailOptions = {
-      from: 'www.faizu9264@gmail.com',
-      to: email,
-      subject: 'OTP for Signup',
-      text: `Your OTP for signup is: ${otp}`,
-    };
- 
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.error('Error sending OTP email:', error);
-      } else {
-        console.log('Email sent: ' + info.response);
-      }
+  sendOTP(email: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const otp = this.generateOTP();
+      console.log(email, 'sending otp to email');
+  
+      const mailOptions = {
+        from: 'www.faizu9264@gmail.com',
+        to: email,
+        subject: 'OTP for Signup',
+        text: `Your OTP for signup is: ${otp}`,
+      };
+  
+      transporter.sendMail(mailOptions, async (error, info) => {
+        if (error) {
+          console.error('Error sending OTP email:', error);
+          reject(error);
+        } else {
+          await this.storeOTP(email, otp);
+          console.log('Email sent: ' + info.response);
+          resolve(otp);
+        }
+      });
     });
   }
+  
 
-  storeOTP(email: string, otp: string): void {
-    this.otpRepository.storeOTP(email, otp);
-  }
 
-  getStoredOTP(email: string): string | undefined {
-    return this.otpRepository.getStoredOTP(email);
-  }
+storeOTP(email: string, otp: string): void {
+  const otpStore = DefaultOTPService.getOtpStore();
+  otpStore[email] = otp;
+}
 
-  verifyOTP(email: string, userEnteredOTP: string): boolean {
-    const storedOTP = this.getStoredOTP(email);
-    return storedOTP === userEnteredOTP;
+getStoredOTP(email: string): string | undefined {
+  const otpStore = DefaultOTPService.getOtpStore();
+  return otpStore[email];
+}
+
+verifyOTP(email: string, userEnteredOTP: string): boolean {
+  const storedOTP = this.getStoredOTP(email);
+  console.log(storedOTP, 'storedOTP');
+  return storedOTP === userEnteredOTP;
+}
+
+// Static method to get or create a singleton instance of the OTP store
+private static getOtpStore(): Record<string, string> {
+  if (!DefaultOTPService.otpStore) {
+    DefaultOTPService.otpStore = {};
   }
+  return DefaultOTPService.otpStore;
+}
+
+private static otpStore: Record<string, string>;
+
+// ...
+
 }

@@ -23,11 +23,23 @@ export const generateRefreshToken = (user: User): string => {
 
 
 
+
 export const hashPassword = async (password: string): Promise<string> => {
-  const saltRounds = 10;
-  return bcrypt.hash(password, saltRounds);
+  try {
+    console.log('Password to hash:', password);
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    console.log('Hashed Password:', hashedPassword);
+    return hashedPassword;
+  } catch (error) {
+    console.error('Error hashing password:', error);
+    throw error;
+  }
 };
 
-export const comparePasswords = async (inputPassword: string, hashedPassword: string): Promise<boolean> => {
-  return bcrypt.compare(inputPassword, hashedPassword);
+
+export const comparePasswords = async (password: string, hashedPassword: string): Promise<boolean> => {
+  const match = await bcrypt.compare(password, hashedPassword);
+  return match;
 };
+

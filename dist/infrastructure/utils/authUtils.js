@@ -32,11 +32,21 @@ const generateRefreshToken = (user) => {
 };
 exports.generateRefreshToken = generateRefreshToken;
 const hashPassword = (password) => __awaiter(void 0, void 0, void 0, function* () {
-    const saltRounds = 10;
-    return bcrypt_1.default.hash(password, saltRounds);
+    try {
+        console.log('Password to hash:', password);
+        const saltRounds = 10;
+        const hashedPassword = yield bcrypt_1.default.hash(password, saltRounds);
+        console.log('Hashed Password:', hashedPassword);
+        return hashedPassword;
+    }
+    catch (error) {
+        console.error('Error hashing password:', error);
+        throw error;
+    }
 });
 exports.hashPassword = hashPassword;
-const comparePasswords = (inputPassword, hashedPassword) => __awaiter(void 0, void 0, void 0, function* () {
-    return bcrypt_1.default.compare(inputPassword, hashedPassword);
+const comparePasswords = (password, hashedPassword) => __awaiter(void 0, void 0, void 0, function* () {
+    const match = yield bcrypt_1.default.compare(password, hashedPassword);
+    return match;
 });
 exports.comparePasswords = comparePasswords;

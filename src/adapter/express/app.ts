@@ -3,16 +3,17 @@ import express from 'express';
 import userRoutes from './routes/userRoutes';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
-import { signUpController, verifyOTPController } from './controllers/userController';
+import morgan from 'morgan';
 import cors from 'cors';
 const app = express();
 
+app.use(morgan('dev'));
 app.use(cors()); 
 app.use(express.json());
 app.use(cookieParser());
 app.use(
   session({
-    secret: 'your_secret_key',
+    secret: 'Faizu',
     resave: false,
     saveUninitialized: true,
     cookie: { secure: false },

@@ -2,6 +2,7 @@
 import { OTPRepository } from '../../domain/otp/otpRepository';
 
 export default class InMemoryOTPRepository implements OTPRepository {
+  
   private otpStore: Record<string, string> = {};
 
   storeOTP(email: string, otp: string): void {

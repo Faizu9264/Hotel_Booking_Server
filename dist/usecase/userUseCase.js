@@ -24,31 +24,44 @@ class DefaultUserUseCase {
     }
     sendOTP(email) {
         return __awaiter(this, void 0, void 0, function* () {
-            const otp = this.otpService.generateOTP();
-            this.otpService.storeOTP(email, otp);
-            yield this.otpService.sendOTP(email, otp);
+            const otp = yield this.otpService.sendOTP(email);
             return { message: 'OTP sent successfully' };
         });
     }
     verifyOTP(email, userEnteredOTP) {
         return __awaiter(this, void 0, void 0, function* () {
             const storedOTP = this.otpService.getStoredOTP(email);
+            console.log(storedOTP, 'storedOTP');
             return storedOTP === userEnteredOTP;
         });
     }
     createUserAfterVerification(user) {
         return __awaiter(this, void 0, void 0, function* () {
-            const hashedPassword = yield (0, authUtils_1.hashPassword)(user.password);
-            const newUser = yield userRepository_1.default.create(Object.assign(Object.assign({}, user), { password: hashedPassword }));
-            return { message: 'Signup successful' };
+            try {
+                console.log('User before hashing password:', user);
+                const hashedPassword = yield (0, authUtils_1.hashPassword)(user.password);
+                console.log('Hashed Password:', hashedPassword);
+                const newUser = yield userRepository_1.default.create(Object.assign(Object.assign({}, user), { password: hashedPassword }));
+                console.log('New User Created:', newUser);
+                return { message: 'Signup successful' };
+            }
+            catch (error) {
+                console.error('Error creating user after verification:', error);
+                throw error;
+            }
         });
     }
     signUp(user) {
         return __awaiter(this, void 0, void 0, function* () {
-            const otp = this.otpService.generateOTP();
-            this.otpService.storeOTP(user.email, otp);
-            this.otpService.sendOTP(user.email, otp);
-            return { message: 'OTP sent for verification' };
+            try {
+                const otp = yield this.otpService.sendOTP(user.email);
+                console.log('OTP sent for verification:', otp);
+                return { message: 'OTP sent for verification' };
+            }
+            catch (error) {
+                console.error('Error sending OTP:', error);
+                throw new Error('Error sending OTP');
+            }
         });
     }
     login(email, password) {
