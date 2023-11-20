@@ -63,4 +63,8 @@ export class DefaultUserUseCase {
       return null;
     }
   }
+
+  async getUserByEmail(email: string): Promise<UserDocument | null> {
+    return UserRepository.findOne({ email });
+  }
 }

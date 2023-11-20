@@ -9,10 +9,11 @@ export interface User {
 }
 
 export interface UserDocument extends Document {
-  _id: string;
+  _id?: string;
   username: string;
   email: string;
   password: string;
+  isGoogle?:boolean;
 }
 
 const userSchema = new Schema<UserDocument>({

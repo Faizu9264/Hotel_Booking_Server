@@ -14,4 +14,5 @@ router.post('/signup', userController_1.sendOTPController);
 router.post('/verify-otp', userController_1.verifyOTPController);
 router.post('/complete-signup', userController_1.completeSignupController);
 router.post('/login', userController_1.loginController);
+router.post('/google-login', userController_1.googleLoginController);
 exports.default = router;

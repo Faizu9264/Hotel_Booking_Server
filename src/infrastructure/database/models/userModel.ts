@@ -6,6 +6,7 @@ export interface User {
   username: string;
   email: string;
   password: string;
+  isGoogle?:boolean;
 }
 
 export interface UserDocument extends Document, Omit<User, '_id'> {}

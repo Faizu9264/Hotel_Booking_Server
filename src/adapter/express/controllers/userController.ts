@@ -3,6 +3,7 @@ import { Request, Response } from 'express';
 import { DefaultUserUseCase } from '../../../usecase/userUseCase';
 import { DefaultOTPService } from '../../../usecase/otp/defaultOTPService';
 import InMemoryOTPRepository from '../../../usecase/otp/defaultOTPRepository';
+import { generateAccessToken, generateRefreshToken, comparePasswords, hashPassword } from '../../../infrastructure/utils/authUtils';
 
 const otpRepository = new InMemoryOTPRepository(); 
 const otpService = new DefaultOTPService(otpRepository);
@@ -44,8 +45,6 @@ export const verifyOTPController = async (req: Request, res: Response): Promise<
 
 export const completeSignupController = async (req: Request, res: Response): Promise<void> => {
   try {
-    console.log('route called ');
-    
     const { username, email, password } = req.body;
     console.log('Received data for complete signup:', { username, email, password });
 
@@ -53,9 +52,19 @@ export const completeSignupController = async (req: Request, res: Response): Pro
     await userUseCase.createUserAfterVerification({ username, email, password } as any);
 
     res.status(201).json({ message: 'Signup successful' });
-  } catch (error) {
+  } catch (error:any) {
     console.error('Error in completeSignupController:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+
+    if (error.code === 11000 && error.keyPattern && error.keyValue) {
+      const duplicateField = Object.keys(error.keyPattern)[0];
+      const duplicateValue = error.keyValue[duplicateField];
+
+      res.status(400).json({
+        error: ` The ${duplicateField} '${duplicateValue}' is already in use.`,
+      });
+    } else {
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
   }
 };
 
@@ -82,5 +91,36 @@ export const loginController = async (req: Request, res: Response): Promise<void
     console.error('Error in loginController:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   
+  }
+};
+
+export const googleLoginController = async (req: Request, res: Response): Promise<void> => {
+  console.log('inside googleLoginController');
+  
+  try {
+    const { email, username, token } = req.body;
+     console.log('email, username',email, username);
+     
+    const userUseCase = new DefaultUserUseCase();
+
+    const existingUser = await userUseCase.getUserByEmail(email);
+   console.log('existingUser',existingUser);
+   
+    if (existingUser) {
+      const accessToken = generateAccessToken(existingUser);
+      res.status(200).json({ message: 'Login successful', accessToken });
+    } else {
+      const newUser = { email, username, password: token };
+
+
+      await userUseCase.createUserAfterVerification(newUser as any); 
+      const getUser = await userUseCase.getUserByEmail(email);
+      const accessToken = generateAccessToken(getUser as any); 
+
+      res.status(201).json({ message: 'Signup successful', accessToken });
+    }
+  } catch (error) {
+    console.error('Error in googleLoginController:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };

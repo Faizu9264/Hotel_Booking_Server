@@ -77,5 +77,10 @@ class DefaultUserUseCase {
             }
         });
     }
+    getUserByEmail(email) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return userRepository_1.default.findOne({ email });
+        });
+    }
 }
 exports.DefaultUserUseCase = DefaultUserUseCase;
