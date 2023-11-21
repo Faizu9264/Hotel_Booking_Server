@@ -33,10 +33,8 @@ const generateRefreshToken = (user) => {
 exports.generateRefreshToken = generateRefreshToken;
 const hashPassword = (password) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        console.log('Password to hash:', password);
         const saltRounds = 10;
         const hashedPassword = yield bcrypt_1.default.hash(password, saltRounds);
-        console.log('Hashed Password:', hashedPassword);
         return hashedPassword;
     }
     catch (error) {

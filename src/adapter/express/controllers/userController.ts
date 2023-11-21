@@ -27,8 +27,8 @@ export const verifyOTPController = async (req: Request, res: Response): Promise<
     const { email, otp} = req.body;
     console.log('Received data:', email, otp);
 
-    const userUseCase = new DefaultUserUseCase();
-    const isOTPValid = await userUseCase.verifyOTP(email, otp);
+    // const userUseCase = new DefaultUserUseCase();
+    const isOTPValid = await otpService.verifyOTP(email, otp);
 
     if (isOTPValid) {
       console.log('OTP is valid....');
@@ -79,10 +79,7 @@ export const loginController = async (req: Request, res: Response): Promise<void
     const tokens = await userUseCase.login(email, password);
 
     if (tokens) {
-      // Send the access token in the response
       res.cookie('accessToken', tokens.accessToken, { httpOnly: true });
-
-      // Send any other information as needed
       res.status(200).json({ message: 'Login successful'});
     } else {
       res.status(401).json({ error: 'Invalid credentials' });
@@ -121,6 +118,23 @@ export const googleLoginController = async (req: Request, res: Response): Promis
     }
   } catch (error) {
     console.error('Error in googleLoginController:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+
+// Inside userController.ts
+
+export const resendOTPController = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { email } = req.body;
+
+    const userUseCase = new DefaultUserUseCase();
+    await userUseCase.resendOTP(email);
+
+    res.status(200).json({ message: 'Resent OTP successfully' });
+  } catch (error) {
+    console.error('Error in resendOTPController:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };

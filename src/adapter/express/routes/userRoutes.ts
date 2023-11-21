@@ -6,7 +6,8 @@ import {
   verifyOTPController,
   completeSignupController,
   loginController,
-  googleLoginController
+  googleLoginController,
+  resendOTPController
 } from '../controllers/userController';
 const router = express.Router();
 router.get('/', (req: Request, res: Response) => {
@@ -17,4 +18,5 @@ router.post('/verify-otp', verifyOTPController);
 router.post('/complete-signup', completeSignupController);
 router.post('/login', loginController);
 router.post('/google-login', googleLoginController);
+router.post('/resend-otp', resendOTPController);
 export default router;

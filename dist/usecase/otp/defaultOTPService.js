@@ -14,28 +14,32 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DefaultOTPService = void 0;
 const nodemailer_1 = __importDefault(require("nodemailer"));
-const transporter = nodemailer_1.default.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false,
-    auth: {
-        user: 'www.faizu9264@gmail.com',
-        pass: 'zzbp qmhe joxn tler',
-    },
-});
 class DefaultOTPService {
     constructor(otpRepository) {
         this.otpRepository = otpRepository;
     }
-    generateOTP() {
+    generateOTPWithExpiry() {
         const generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
-        console.log('Generated OTP:', generatedOTP);
-        return generatedOTP;
+        const expiryTime = Date.now() + 3 * 60 * 1000;
+        console.log('Generated OTP:', generatedOTP, 'Expiry Time:', new Date(expiryTime));
+        return { otp: generatedOTP, expiryTime };
     }
     sendOTP(email) {
         return new Promise((resolve, reject) => {
-            const otp = this.generateOTP();
+            const { otp, expiryTime } = this.generateOTPWithExpiry();
             console.log(email, 'sending otp to email');
+            let password = process.env.GMAIL_PASSWORD;
+            console.log(password);
+            const transporter = nodemailer_1.default.createTransport({
+                host: 'smtp.gmail.com',
+                port: 587,
+                secure: false,
+                auth: {
+                    user: 'www.faizu9264@gmail.com',
+                    pass: password,
+                },
+                logger: true,
+            });
             const mailOptions = {
                 from: 'www.faizu9264@gmail.com',
                 to: email,
@@ -48,27 +52,77 @@ class DefaultOTPService {
                     reject(error);
                 }
                 else {
-                    yield this.storeOTP(email, otp);
+                    yield this.storeOTP(email, otp, expiryTime);
                     console.log('Email sent: ' + info.response);
                     resolve(otp);
                 }
             }));
         });
     }
-    storeOTP(email, otp) {
+    // generateOTP(): string {
+    //   const { otp } = this.generateOTPWithExpiry();
+    //   return otp;
+    // }
+    storeOTP(email, otp, expiryTime) {
         const otpStore = DefaultOTPService.getOtpStore();
-        otpStore[email] = otp;
+        otpStore[email] = { otp, expiryTime };
     }
     getStoredOTP(email) {
         const otpStore = DefaultOTPService.getOtpStore();
-        return otpStore[email];
+        const storedOTP = otpStore[email];
+        return storedOTP;
     }
     verifyOTP(email, userEnteredOTP) {
         const storedOTP = this.getStoredOTP(email);
-        console.log(storedOTP, 'storedOTP');
-        return storedOTP === userEnteredOTP;
+        console.log('storedOTP', storedOTP, 'userEnteredOTP', userEnteredOTP);
+        if (storedOTP) {
+            const timeDifference = Date.now() - storedOTP.expiryTime;
+            const expirationThreshold = 2 * 60 * 1000;
+            if (timeDifference <= expirationThreshold) {
+                console.log(storedOTP.otp, 'storedOTP');
+                return { success: storedOTP.otp === userEnteredOTP, message: 'OTP verification successful' };
+            }
+            else {
+                console.log('OTP has expired');
+                return { success: false, message: 'OTP has expired' };
+            }
+        }
+        return { success: false, message: 'Invalid OTP' };
     }
-    // Static method to get or create a singleton instance of the OTP store
+    // Resend OTP with a new expiry
+    resendOTP(email) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { otp, expiryTime } = this.generateOTPWithExpiry();
+                console.log(email, 'resending otp to email');
+                let password = process.env.GMAIL_PASSWORD;
+                console.log(password);
+                const transporter = nodemailer_1.default.createTransport({
+                    host: 'smtp.gmail.com',
+                    port: 587,
+                    secure: false,
+                    auth: {
+                        user: 'www.faizu9264@gmail.com',
+                        pass: password,
+                    },
+                    logger: true,
+                });
+                const mailOptions = {
+                    from: 'www.faizu9264@gmail.com',
+                    to: email,
+                    subject: 'New OTP for Signup',
+                    text: `Your new OTP for signup is: ${otp}`,
+                };
+                yield transporter.sendMail(mailOptions);
+                yield this.storeOTP(email, otp, expiryTime);
+                console.log('Email resent successfully');
+            }
+            catch (error) {
+                console.error('Error resending OTP:', error);
+                throw new Error('Error resending OTP');
+            }
+        });
+    }
     static getOtpStore() {
         if (!DefaultOTPService.otpStore) {
             DefaultOTPService.otpStore = {};

@@ -11,6 +11,7 @@ const express_session_1 = __importDefault(require("express-session"));
 const morgan_1 = __importDefault(require("morgan"));
 const cors_1 = __importDefault(require("cors"));
 const app = (0, express_1.default)();
+require('dotenv').config();
 app.use((0, morgan_1.default)('dev'));
 app.use((0, cors_1.default)({
     origin: 'http://localhost:3000',

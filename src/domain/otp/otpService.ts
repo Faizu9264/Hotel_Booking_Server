@@ -1,8 +1,7 @@
 // src/domain/otp/otpService.ts
 export interface OTPService {
-    generateOTP(): string;
-    sendOTP(email: string, otp: string): void;
-    storeOTP(email: string, otp: string): void;
-    getStoredOTP(email: string): string | undefined;
-  }
-  
+  // generateOTP(): string;
+  sendOTP(email: string): Promise<string>;
+  storeOTP(email: string, otp: string, expiryTime: number): void;
+  getStoredOTP(email: string): { otp: string; expiryTime: number } | undefined;
+}

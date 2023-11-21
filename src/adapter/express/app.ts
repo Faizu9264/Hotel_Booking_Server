@@ -6,6 +6,7 @@ import session from 'express-session';
 import morgan from 'morgan';
 import cors from 'cors';
 const app = express();
+require('dotenv').config();
 
 app.use(morgan('dev'));
 app.use(cors({

@@ -26,10 +26,8 @@ export const generateRefreshToken = (user: User): string => {
 
 export const hashPassword = async (password: string): Promise<string> => {
   try {
-    console.log('Password to hash:', password);
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
-    console.log('Hashed Password:', hashedPassword);
     return hashedPassword;
   } catch (error) {
     console.error('Error hashing password:', error);

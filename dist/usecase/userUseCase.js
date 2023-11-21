@@ -28,19 +28,12 @@ class DefaultUserUseCase {
             return { message: 'OTP sent successfully' };
         });
     }
-    verifyOTP(email, userEnteredOTP) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const storedOTP = this.otpService.getStoredOTP(email);
-            console.log(storedOTP, 'storedOTP');
-            return storedOTP === userEnteredOTP;
-        });
-    }
     createUserAfterVerification(user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                console.log('User before hashing password:', user);
+                // console.log('User before hashing password:', user);
                 const hashedPassword = yield (0, authUtils_1.hashPassword)(user.password);
-                console.log('Hashed Password:', hashedPassword);
+                // console.log('Hashed Password:', hashedPassword);
                 const newUser = yield userRepository_1.default.create(Object.assign(Object.assign({}, user), { password: hashedPassword }));
                 console.log('New User Created:', newUser);
                 return { message: 'Signup successful' };
@@ -80,6 +73,18 @@ class DefaultUserUseCase {
     getUserByEmail(email) {
         return __awaiter(this, void 0, void 0, function* () {
             return userRepository_1.default.findOne({ email });
+        });
+    }
+    resendOTP(email) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                yield this.otpService.resendOTP(email);
+                return { message: 'Resent OTP successfully' };
+            }
+            catch (error) {
+                console.error('Error resending OTP:', error);
+                throw new Error('Error resending OTP');
+            }
         });
     }
 }
