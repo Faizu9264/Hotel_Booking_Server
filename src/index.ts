@@ -1,4 +1,5 @@
 // src/index.ts
+import 'reflect-metadata';
 import app from './adapter/express/app';
 import { connectToDatabase } from './infrastructure/config';
 

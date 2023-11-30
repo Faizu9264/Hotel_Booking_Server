@@ -79,11 +79,13 @@ exports.completeSignupController = completeSignupController;
 const loginController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { email, password } = req.body;
+        console.log('Received login credentials:', email, password);
         const userUseCase = new userUseCase_1.DefaultUserUseCase();
         const tokens = yield userUseCase.login(email, password);
         if (tokens) {
-            res.cookie('accessToken', tokens.accessToken, { httpOnly: true });
-            res.status(200).json({ message: 'Login successful' });
+            const isSecureCookie = process.env.COOKIE_SECURE === 'true';
+            res.cookie('accessToken', tokens.accessToken, { httpOnly: true, secure: isSecureCookie });
+            res.status(200).json({ message: 'Login successful', refreshToken: tokens.refreshToken });
         }
         else {
             res.status(401).json({ error: 'Invalid credentials' });
@@ -104,14 +106,14 @@ const googleLoginController = (req, res) => __awaiter(void 0, void 0, void 0, fu
         const existingUser = yield userUseCase.getUserByEmail(email);
         console.log('existingUser', existingUser);
         if (existingUser) {
-            const accessToken = (0, authUtils_1.generateAccessToken)(existingUser);
+            const accessToken = (0, authUtils_1.generateAccessToken)(existingUser, 'user');
             res.status(200).json({ message: 'Login successful', accessToken });
         }
         else {
             const newUser = { email, username, password: token };
             yield userUseCase.createUserAfterVerification(newUser);
             const getUser = yield userUseCase.getUserByEmail(email);
-            const accessToken = (0, authUtils_1.generateAccessToken)(getUser);
+            const accessToken = (0, authUtils_1.generateAccessToken)(getUser, 'user');
             res.status(201).json({ message: 'Signup successful', accessToken });
         }
     }

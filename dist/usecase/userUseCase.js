@@ -32,9 +32,10 @@ class DefaultUserUseCase {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 // console.log('User before hashing password:', user);
-                const hashedPassword = yield (0, authUtils_1.hashPassword)(user.password);
+                const { email, password } = user;
+                const hashedPassword = yield (0, authUtils_1.hashPassword)(password);
                 // console.log('Hashed Password:', hashedPassword);
-                const newUser = yield userRepository_1.default.create(Object.assign(Object.assign({}, user), { password: hashedPassword }));
+                const newUser = yield userRepository_1.default.create(Object.assign(Object.assign({}, user), { email, password: hashedPassword }));
                 console.log('New User Created:', newUser);
                 return { message: 'Signup successful' };
             }
@@ -61,7 +62,7 @@ class DefaultUserUseCase {
         return __awaiter(this, void 0, void 0, function* () {
             const existingUser = yield userRepository_1.default.findOne({ email });
             if (existingUser && (yield (0, authUtils_1.comparePasswords)(password, existingUser.password))) {
-                const accessToken = (0, authUtils_1.generateAccessToken)(existingUser);
+                const accessToken = (0, authUtils_1.generateAccessToken)(existingUser, 'user');
                 const refreshToken = (0, authUtils_1.generateRefreshToken)(existingUser);
                 return { accessToken, refreshToken };
             }

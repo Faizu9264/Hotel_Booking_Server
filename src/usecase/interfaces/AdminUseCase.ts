@@ -1,4 +1,4 @@
+// src/usecase/interfaces/AdminUseCase.ts
 export interface AdminUseCase {
-    // Admin use case methods
-  }
-  
+  login(email: string, password: string): Promise<{ accessToken: string; refreshToken: string } | null>;
+}

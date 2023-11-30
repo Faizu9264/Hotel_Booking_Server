@@ -1,4 +1,3 @@
-// tsconfig.json
 {
   "compilerOptions": {
     "target": "es6",
@@ -12,7 +11,9 @@
     "baseUrl": "./src",
     "paths": {
       "*": ["types/*"]
-    }
+    },
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   },
   "include": [
     "src/**/*.ts"

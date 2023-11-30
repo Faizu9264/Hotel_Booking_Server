@@ -7,8 +7,8 @@ export const tokenValidationMiddleware = (req: Request, res: Response, next: Nex
   const authHeaderToken = req.header('Authorization')?.replace('Bearer ', '');
   const cookieToken = req.cookies.accessToken;
   const token = authHeaderToken || cookieToken;
-  
-  if (!token) {
+  const refreshToken = req.cookies.refreshToken;
+  if (!token&& !refreshToken) {
     res.status(401).json({ error: 'Unauthorized - Missing Token' });
     return;
   }

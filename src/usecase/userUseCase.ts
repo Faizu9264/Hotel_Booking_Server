@@ -22,9 +22,13 @@ export class DefaultUserUseCase {
   async createUserAfterVerification(user: Omit<UserDocument, '_id'>): Promise<{ message: string }> {
     try {
       // console.log('User before hashing password:', user);
-      const hashedPassword = await hashPassword(user.password);
+      const {email, password} = user;
+      const hashedPassword = await hashPassword(password);
       // console.log('Hashed Password:', hashedPassword);
-      const newUser = await UserRepository.create({ ...user, password: hashedPassword });
+      const newUser = await UserRepository.create({...user,
+        email,
+        password: hashedPassword
+        });
       console.log('New User Created:', newUser);
       return { message: 'Signup successful' };
     } catch (error) {
@@ -48,9 +52,9 @@ export class DefaultUserUseCase {
     const existingUser = await UserRepository.findOne({ email });
 
     if (existingUser && (await comparePasswords(password, existingUser.password))) {
-      const accessToken = generateAccessToken(existingUser);
+      const accessToken = generateAccessToken(existingUser ,'user');
       const refreshToken = generateRefreshToken(existingUser);
-
+       
       return { accessToken, refreshToken };
     } else {
       return null;

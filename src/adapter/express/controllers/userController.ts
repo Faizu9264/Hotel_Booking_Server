@@ -74,20 +74,23 @@ export const completeSignupController = async (req: Request, res: Response): Pro
 export const loginController = async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password } = req.body;
-
+    console.log('Received login credentials:', email, password);
+  
     const userUseCase = new DefaultUserUseCase();
     const tokens = await userUseCase.login(email, password);
 
     if (tokens) {
-      res.cookie('accessToken', tokens.accessToken, { httpOnly: true });
-      res.status(200).json({ message: 'Login successful'});
+      const isSecureCookie = process.env.COOKIE_SECURE === 'true';
+      
+      res.cookie('accessToken', tokens.accessToken, { httpOnly: true, secure: isSecureCookie });
+
+      res.status(200).json({ message: 'Login successful', refreshToken: tokens.refreshToken });
     } else {
       res.status(401).json({ error: 'Invalid credentials' });
     }
   } catch (error) {
     console.error('Error in loginController:', error);
     res.status(500).json({ error: 'Internal Server Error' });
-  
   }
 };
 
@@ -104,7 +107,7 @@ export const googleLoginController = async (req: Request, res: Response): Promis
    console.log('existingUser',existingUser);
    
     if (existingUser) {
-      const accessToken = generateAccessToken(existingUser);
+      const accessToken = generateAccessToken(existingUser ,'user');
       res.status(200).json({ message: 'Login successful', accessToken });
     } else {
       const newUser = { email, username, password: token };
@@ -112,7 +115,7 @@ export const googleLoginController = async (req: Request, res: Response): Promis
 
       await userUseCase.createUserAfterVerification(newUser as any); 
       const getUser = await userUseCase.getUserByEmail(email);
-      const accessToken = generateAccessToken(getUser as any); 
+      const accessToken = generateAccessToken(getUser as any ,'user'); 
 
       res.status(201).json({ message: 'Signup successful', accessToken });
     }

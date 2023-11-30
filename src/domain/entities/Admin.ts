@@ -1,4 +1,12 @@
-export class Admin {
-    // Admin entity properties and methods
-  }
-  
+// src/domain/entities/AdminEntity.ts
+import { Document } from 'mongoose';
+export interface AdminDocument extends Document {
+  _id?: string;
+  // userId: string;
+  email: string;
+  password: string;
+}
+export interface TokenPayload {
+  userId: string;
+  email: string;
+}

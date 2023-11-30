@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 // src/index.ts
+require("reflect-metadata");
 const app_1 = __importDefault(require("./adapter/express/app"));
 const config_1 = require("./infrastructure/config");
 // Load environment variables

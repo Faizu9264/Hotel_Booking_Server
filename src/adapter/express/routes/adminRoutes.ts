@@ -1,9 +1,12 @@
 // src/adapter/express/routes/adminRoutes.ts
-import express from 'express';
-import adminController from '../controllers/adminController';
-
+import express, { Request, Response } from 'express';
+import { adminLoginController } from '../controllers/adminController';
 const router = express.Router();
 
-// Mount admin controller routes
+// router.get('/users', (req: Request, res: Response) => {
+//   res.send('Hello, TypeScript with Express! Admin');
+// });
+
+router.post('/login', adminLoginController);
 
 export default router;

@@ -14,7 +14,9 @@ export interface UserDocument extends Document {
   email: string;
   password: string;
   isGoogle?:boolean;
+  userid?:string;
 }
+
 
 const userSchema = new Schema<UserDocument>({
   username: { type: String, required: true },

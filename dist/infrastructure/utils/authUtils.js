@@ -17,15 +17,17 @@ exports.comparePasswords = exports.hashPassword = exports.generateRefreshToken =
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 exports.secretKey = process.env.JWT_SECRET || 'fallbackSecretKey';
-const generateAccessToken = (user) => {
-    const token = jsonwebtoken_1.default.sign({ userId: user._id, email: user.email }, exports.secretKey, {
+const generateAccessToken = (user, role) => {
+    var _a;
+    const token = jsonwebtoken_1.default.sign({ userId: (_a = user._id) === null || _a === void 0 ? void 0 : _a.toString(), email: user.email, role }, exports.secretKey, {
         expiresIn: '1h',
     });
     return token;
 };
 exports.generateAccessToken = generateAccessToken;
 const generateRefreshToken = (user) => {
-    const token = jsonwebtoken_1.default.sign({ userId: user._id, email: user.email }, exports.secretKey, {
+    var _a;
+    const token = jsonwebtoken_1.default.sign({ userId: (_a = user._id) === null || _a === void 0 ? void 0 : _a.toString(), email: user.email }, exports.secretKey, {
         expiresIn: '7d',
     });
     return token;
@@ -44,7 +46,9 @@ const hashPassword = (password) => __awaiter(void 0, void 0, void 0, function* (
 });
 exports.hashPassword = hashPassword;
 const comparePasswords = (password, hashedPassword) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log('Comparing passwords:', password, hashedPassword);
     const match = yield bcrypt_1.default.compare(password, hashedPassword);
+    console.log('Password comparison result:', match);
     return match;
 });
 exports.comparePasswords = comparePasswords;
