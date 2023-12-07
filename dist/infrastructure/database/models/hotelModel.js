@@ -38,6 +38,7 @@ const hotelSchema = new mongoose_1.Schema({
         emailAddress: { type: String, required: true },
         description: { type: String, required: true },
     },
-    images: [{ type: String }], // Assuming images are stored as URLs
+    images: { type: [String], default: [] },
+    createdAt: { type: Date, default: Date.now },
 });
 exports.default = mongoose_1.default.model('Hotel', hotelSchema);

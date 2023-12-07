@@ -21,5 +21,6 @@ router.post('/complete-signup', completeSignupController);
 router.post('/login', loginController);
 router.post('/google-login', googleLoginController);
 router.post('/resend-otp', resendOTPController);
-router.use( refreshTokenMiddleware(refreshTokenUseCase))
+
+// router.use( refreshTokenMiddleware(refreshTokenUseCase))
 export default router;

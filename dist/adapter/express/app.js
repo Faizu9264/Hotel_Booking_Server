@@ -32,8 +32,21 @@ app.use((0, express_session_1.default)({
 app.get('/', (req, res) => {
     res.send('Welcome to the homepage!');
 });
-app.use('/admin', adminRoutes_1.default);
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    if (req.method === 'OPTIONS') {
+        res.sendStatus(200);
+    }
+    else {
+        next();
+    }
+});
 app.use('/admin/hotel', hotelRoutes_1.default);
+app.use('/user/hotel', hotelRoutes_1.default);
+app.use('/admin', adminRoutes_1.default);
 app.use('/user', userRoutes_1.default);
 app.use('/auth', authRoutes_1.default);
 exports.default = app;

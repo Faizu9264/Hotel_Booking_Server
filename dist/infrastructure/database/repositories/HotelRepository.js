@@ -1,4 +1,5 @@
 "use strict";
+// src/infrastructure/database/repositories/HotelRepository.ts
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -22,8 +23,20 @@ class HotelRepository {
     }
     getAllHotels() {
         return __awaiter(this, void 0, void 0, function* () {
-            const allHotels = yield this.hotelModel.find().lean().exec();
+            const allHotels = yield this.hotelModel.find().sort({ createdAt: -1 }).lean().exec();
             return allHotels;
+        });
+    }
+    updateHotel(hotelId, updatedDetails) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (typeof updatedDetails.images === 'string') {
+                updatedDetails.images = JSON.parse(updatedDetails.images);
+            }
+            const updatedHotel = yield this.hotelModel
+                .findByIdAndUpdate(hotelId, { $set: updatedDetails }, { new: true })
+                .lean()
+                .exec();
+            return updatedHotel;
         });
     }
 }

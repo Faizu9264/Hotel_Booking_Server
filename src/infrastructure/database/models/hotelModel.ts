@@ -15,7 +15,8 @@ const hotelSchema = new Schema({
     emailAddress: { type: String, required: true },
     description: { type: String, required: true },
   },
-  images: [{ type: String }], // Assuming images are stored as URLs
+  images: { type: [String], default: [] }, 
+  createdAt: { type: Date, default: Date.now },
 });
 
 export default mongoose.model<Document & Hotel>('Hotel', hotelSchema);

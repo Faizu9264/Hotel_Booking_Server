@@ -5,7 +5,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const authController_1 = require("../controllers/authController");
 const inversify_config_1 = require("../../../usecase/inversify.config");
 const RefreshTokenUseCase_1 = require("../../../usecase/RefreshTokenUseCase");
 const userController_1 = require("../controllers/userController");
@@ -17,5 +16,5 @@ router.post('/complete-signup', userController_1.completeSignupController);
 router.post('/login', userController_1.loginController);
 router.post('/google-login', userController_1.googleLoginController);
 router.post('/resend-otp', userController_1.resendOTPController);
-router.use((0, authController_1.refreshTokenMiddleware)(refreshTokenUseCase));
+// router.use( refreshTokenMiddleware(refreshTokenUseCase))
 exports.default = router;

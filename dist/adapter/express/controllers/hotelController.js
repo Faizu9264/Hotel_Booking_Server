@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAllHotelsController = exports.createHotelController = void 0;
+exports.updateHotelController = exports.getAllHotelsController = exports.createHotelController = void 0;
 const HotelUseCase_1 = require("../../../usecase/HotelUseCase");
 const HotelRepository_1 = require("../../../infrastructure/database/repositories/HotelRepository");
 const hotelModel_1 = __importDefault(require("../../../infrastructure/database/models/hotelModel"));
@@ -22,7 +22,6 @@ const createHotelController = (req, res) => __awaiter(void 0, void 0, void 0, fu
     try {
         const hotelDetails = req.body;
         const createdHotel = yield hotelUseCase.createHotel(hotelDetails);
-        console.log(createdHotel);
         res.status(201).json(createdHotel);
     }
     catch (error) {
@@ -42,3 +41,25 @@ const getAllHotelsController = (_req, res) => __awaiter(void 0, void 0, void 0, 
     }
 });
 exports.getAllHotelsController = getAllHotelsController;
+const updateHotelController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { hotelId } = req.params;
+        const updatedDetails = req.body;
+        const updatedHotel = yield hotelUseCase.updateHotel(hotelId, {
+            location: updatedDetails.location,
+            details: updatedDetails.details,
+            images: updatedDetails.images.flat(),
+        });
+        if (updatedHotel) {
+            res.status(200).json(updatedHotel);
+        }
+        else {
+            res.status(404).json({ error: 'Hotel not found' });
+        }
+    }
+    catch (error) {
+        console.error('Error updating hotel:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+exports.updateHotelController = updateHotelController;

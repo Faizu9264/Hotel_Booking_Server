@@ -38,6 +38,13 @@ let HotelUseCase = class HotelUseCase {
             return this.hotelService.getAllHotels();
         });
     }
+    updateHotel(hotelId, updatedDetails) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const updatedHotel = yield this.hotelService.updateHotel(hotelId, updatedDetails);
+            console.log('updatedHotel', updatedHotel);
+            return updatedHotel;
+        });
+    }
 };
 exports.HotelUseCase = HotelUseCase;
 exports.HotelUseCase = HotelUseCase = __decorate([

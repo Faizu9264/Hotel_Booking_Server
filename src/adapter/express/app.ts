@@ -8,18 +8,19 @@ import cors from 'cors';
 import authRoutes from './routes/authRoutes';
 import hotelRoutes from './routes/hotelRoutes';
 
-
 const app = express();
 
 require('dotenv').config();
 
 app.use(morgan('dev'));
+
 app.use(
   cors({
     origin: 'http://localhost:3000',
     credentials: true,
   })
 );
+
 app.use(express.json());
 app.use(cookieParser());
 app.use(
@@ -37,8 +38,23 @@ app.get('/', (req, res) => {
   res.send('Welcome to the homepage!');
 });
 
-app.use('/admin', adminRoutes);
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  res.header('Access-Control-Allow-Credentials', 'true');
+
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200);
+  } else {
+    next();
+  }
+});
+
 app.use('/admin/hotel', hotelRoutes);
+app.use('/user/hotel', hotelRoutes);
+
+app.use('/admin', adminRoutes);
 app.use('/user', userRoutes);
 app.use('/auth', authRoutes);
 

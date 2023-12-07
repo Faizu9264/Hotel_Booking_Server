@@ -14,4 +14,10 @@ export class HotelUseCase {
   async getAllHotels(): Promise<Hotel[]> {
     return this.hotelService.getAllHotels();
   }
+
+  async updateHotel(hotelId: string, updatedDetails: Partial<Hotel>): Promise<Hotel | null> {
+    const updatedHotel = await this.hotelService.updateHotel(hotelId, updatedDetails);
+    console.log('updatedHotel', updatedHotel);
+    return updatedHotel;
+  }
 }

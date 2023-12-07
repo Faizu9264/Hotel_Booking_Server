@@ -39,6 +39,11 @@ let DefaultHotelService = class DefaultHotelService {
             return this.hotelRepository.getAllHotels();
         });
     }
+    updateHotel(hotelId, updatedDetails) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.hotelRepository.updateHotel(hotelId, updatedDetails);
+        });
+    }
 };
 exports.DefaultHotelService = DefaultHotelService;
 exports.DefaultHotelService = DefaultHotelService = __decorate([
