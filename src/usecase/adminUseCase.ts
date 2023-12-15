@@ -1,10 +1,12 @@
 // src/usecase/adminUseCase.ts
 import { AdminUseCase } from './interfaces/AdminUseCase';
 import AdminRepository from '../infrastructure/database/repositories/adminRepository';
-import { comparePasswords, generateAccessToken, generateRefreshToken } from '../infrastructure/utils/authUtils';
+import UserRepository from '../infrastructure/database/repositories/userRepository';
+import { comparePasswords, generateAccessToken } from '../infrastructure/utils/authUtils';
+import { UserDocument } from '../domain/entities/User';
 
 export class DefaultAdminUseCase implements AdminUseCase {
-  async login(email: string, password: string): Promise<{ accessToken: string; refreshToken: string } | null> {
+  async login(email: string, password: string): Promise<{ accessToken: string} | null> {
     const admin = await AdminRepository.findOne({ email: email.toLowerCase() });
 
     console.log('Admin:', admin);
@@ -20,14 +22,78 @@ export class DefaultAdminUseCase implements AdminUseCase {
       if (isPasswordMatch) {
         // Passwords match, generate tokens
         const accessToken = generateAccessToken(admin, 'admin');
-        const refreshToken = generateRefreshToken(admin);
 
-        return { accessToken, refreshToken };
+        return { accessToken};
       } else {
         return null;
       }
     } else {
       return null;
+    }
+  }
+
+  async getAllUsers(): Promise<UserDocument[]> {
+    try {
+      const users = await UserRepository.find({});
+      return users;
+    } catch (error) {
+      console.error('Error getting all users:', error);
+      throw error;
+    }
+  }
+
+  async editUserById(userId: string, updatedDetails: Partial<UserDocument>): Promise<void> {
+    try {
+      await UserRepository.findByIdAndUpdate(userId, updatedDetails);
+    } catch (error) {
+      console.error('Error editing user:', error);
+      throw error;
+    }
+  }
+
+  async blockUser(userId: string): Promise<void> {
+    try {
+      // Find the user by ID
+      const user = await UserRepository.findOne({ _id: userId });
+
+      // Check if the user exists
+      if (!user) {
+        throw new Error(`User with ID ${userId} not found`);
+      }
+
+      // Check if the user is already blocked
+      if (user.blocked) {
+        throw new Error(`User with ID ${userId} is already blocked`);
+      }
+
+      // Update the user's blocked status to true
+      await UserRepository.findByIdAndUpdate(userId, { blocked: true });
+    } catch (error) {
+      console.error('Error blocking user:', error);
+      throw error;
+    }
+  }
+
+  async unblockUser(userId: string): Promise<void> {
+    try {
+      // Find the user by ID
+      const user = await UserRepository.findOne({ _id: userId });
+
+    
+      if (!user) {
+        throw new Error(`User with ID ${userId} not found`);
+      }
+
+      // Check if the user is already unblocked
+      if (!user.blocked) {
+        throw new Error(`User with ID ${userId} is not blocked`);
+      }
+
+      // Update the user's blocked status to false
+      await UserRepository.findByIdAndUpdate(userId, { blocked: false });
+    } catch (error) {
+      console.error('Error unblocking user:', error);
+      throw error;
     }
   }
 }

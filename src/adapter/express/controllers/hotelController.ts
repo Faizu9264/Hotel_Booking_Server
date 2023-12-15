@@ -11,6 +11,8 @@ const hotelUseCase = new HotelUseCase(hotelRepository);
 export const createHotelController = async (req: Request, res: Response): Promise<void> => {
   try {
     const hotelDetails = req.body;
+    console.log('hotelDetail',hotelDetails);
+    
     const createdHotel = await hotelUseCase.createHotel(hotelDetails as Hotel);
 
     res.status(201).json(createdHotel);

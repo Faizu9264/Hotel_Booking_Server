@@ -5,8 +5,8 @@ import cookieParser from 'cookie-parser';
 import session from 'express-session';
 import morgan from 'morgan';
 import cors from 'cors';
-import authRoutes from './routes/authRoutes';
 import hotelRoutes from './routes/hotelRoutes';
+import roomRoutes from './routes/roomRoutes';
 
 const app = express();
 
@@ -53,9 +53,10 @@ app.use((req, res, next) => {
 
 app.use('/admin/hotel', hotelRoutes);
 app.use('/user/hotel', hotelRoutes);
-
+app.use('/admin/room', roomRoutes);
+app.use('/user/room', roomRoutes);
 app.use('/admin', adminRoutes);
 app.use('/user', userRoutes);
-app.use('/auth', authRoutes);
+
 
 export default app;

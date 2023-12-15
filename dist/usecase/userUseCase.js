@@ -17,6 +17,7 @@ const userRepository_1 = __importDefault(require("../infrastructure/database/rep
 const authUtils_1 = require("../infrastructure/utils/authUtils");
 const defaultOTPService_1 = require("./otp/defaultOTPService");
 const defaultOTPRepository_1 = __importDefault(require("./otp/defaultOTPRepository"));
+// import userRepository from '../infrastructure/database/repositories/userRepository';
 class DefaultUserUseCase {
     constructor() {
         const otpRepository = new defaultOTPRepository_1.default();
@@ -31,11 +32,9 @@ class DefaultUserUseCase {
     createUserAfterVerification(user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                // console.log('User before hashing password:', user);
                 const { email, password } = user;
                 const hashedPassword = yield (0, authUtils_1.hashPassword)(password);
-                // console.log('Hashed Password:', hashedPassword);
-                const newUser = yield userRepository_1.default.create(Object.assign(Object.assign({}, user), { email, password: hashedPassword }));
+                const newUser = yield userRepository_1.default.create(Object.assign(Object.assign({}, user), { email, password: hashedPassword, role: 'user' }));
                 console.log('New User Created:', newUser);
                 return { message: 'Signup successful' };
             }
@@ -63,8 +62,7 @@ class DefaultUserUseCase {
             const existingUser = yield userRepository_1.default.findOne({ email });
             if (existingUser && (yield (0, authUtils_1.comparePasswords)(password, existingUser.password))) {
                 const accessToken = (0, authUtils_1.generateAccessToken)(existingUser, 'user');
-                const refreshToken = (0, authUtils_1.generateRefreshToken)(existingUser);
-                return { accessToken, refreshToken };
+                return { accessToken };
             }
             else {
                 return null;
@@ -86,6 +84,52 @@ class DefaultUserUseCase {
                 console.error('Error resending OTP:', error);
                 throw new Error('Error resending OTP');
             }
+        });
+    }
+    updateProfile(userId, updatedData) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const user = yield userRepository_1.default.findOne({ _id: userId });
+                if (!user) {
+                    console.log('User not found');
+                    return null;
+                }
+                console.log('Updating user:', user);
+                Object.assign(user, updatedData);
+                const updatedUser = yield user.save();
+                console.log('Updated user:', updatedUser);
+                return updatedUser;
+            }
+            catch (error) {
+                console.error('Error updating profile:', error);
+                throw error;
+            }
+        });
+    }
+    changePassword(userId, currentPassword, newPassword) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const user = yield userRepository_1.default.findOne({ _id: userId });
+                if (!user) {
+                    return false;
+                }
+                const isCurrentPasswordValid = yield (0, authUtils_1.comparePasswords)(currentPassword, user.password);
+                if (!isCurrentPasswordValid) {
+                    return false;
+                }
+                user.password = yield (0, authUtils_1.hashPassword)(newPassword);
+                yield user.save();
+                return true;
+            }
+            catch (error) {
+                console.error('Error changing password:', error);
+                throw error;
+            }
+        });
+    }
+    getUserByToken(token) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return userRepository_1.default.findOne({ _id: token });
         });
     }
 }

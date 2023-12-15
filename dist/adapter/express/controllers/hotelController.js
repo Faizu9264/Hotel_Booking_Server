@@ -21,6 +21,7 @@ const hotelUseCase = new HotelUseCase_1.HotelUseCase(hotelRepository);
 const createHotelController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const hotelDetails = req.body;
+        console.log('hotelDetail', hotelDetails);
         const createdHotel = yield hotelUseCase.createHotel(hotelDetails);
         res.status(201).json(createdHotel);
     }

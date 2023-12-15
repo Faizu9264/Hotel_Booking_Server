@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DefaultAdminUseCase = void 0;
 const adminRepository_1 = __importDefault(require("../infrastructure/database/repositories/adminRepository"));
+const userRepository_1 = __importDefault(require("../infrastructure/database/repositories/userRepository"));
 const authUtils_1 = require("../infrastructure/utils/authUtils");
 class DefaultAdminUseCase {
     login(email, password) {
@@ -30,8 +31,7 @@ class DefaultAdminUseCase {
                 if (isPasswordMatch) {
                     // Passwords match, generate tokens
                     const accessToken = (0, authUtils_1.generateAccessToken)(admin, 'admin');
-                    const refreshToken = (0, authUtils_1.generateRefreshToken)(admin);
-                    return { accessToken, refreshToken };
+                    return { accessToken };
                 }
                 else {
                     return null;
@@ -39,6 +39,72 @@ class DefaultAdminUseCase {
             }
             else {
                 return null;
+            }
+        });
+    }
+    getAllUsers() {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const users = yield userRepository_1.default.find({});
+                return users;
+            }
+            catch (error) {
+                console.error('Error getting all users:', error);
+                throw error;
+            }
+        });
+    }
+    editUserById(userId, updatedDetails) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                yield userRepository_1.default.findByIdAndUpdate(userId, updatedDetails);
+            }
+            catch (error) {
+                console.error('Error editing user:', error);
+                throw error;
+            }
+        });
+    }
+    blockUser(userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                // Find the user by ID
+                const user = yield userRepository_1.default.findOne({ _id: userId });
+                // Check if the user exists
+                if (!user) {
+                    throw new Error(`User with ID ${userId} not found`);
+                }
+                // Check if the user is already blocked
+                if (user.blocked) {
+                    throw new Error(`User with ID ${userId} is already blocked`);
+                }
+                // Update the user's blocked status to true
+                yield userRepository_1.default.findByIdAndUpdate(userId, { blocked: true });
+            }
+            catch (error) {
+                console.error('Error blocking user:', error);
+                throw error;
+            }
+        });
+    }
+    unblockUser(userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                // Find the user by ID
+                const user = yield userRepository_1.default.findOne({ _id: userId });
+                if (!user) {
+                    throw new Error(`User with ID ${userId} not found`);
+                }
+                // Check if the user is already unblocked
+                if (!user.blocked) {
+                    throw new Error(`User with ID ${userId} is not blocked`);
+                }
+                // Update the user's blocked status to false
+                yield userRepository_1.default.findByIdAndUpdate(userId, { blocked: false });
+            }
+            catch (error) {
+                console.error('Error unblocking user:', error);
+                throw error;
             }
         });
     }

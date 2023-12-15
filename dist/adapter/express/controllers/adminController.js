@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.adminLoginController = void 0;
+exports.unblockUserController = exports.blockUserController = exports.editUserController = exports.getAllUsersController = exports.adminLoginController = void 0;
 const adminUseCase_1 = require("../../../usecase/adminUseCase");
 const authUtils_1 = require("../../../infrastructure/utils/authUtils");
 const adminLoginController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -19,9 +19,7 @@ const adminLoginController = (req, res) => __awaiter(void 0, void 0, void 0, fun
         const tokenPair = yield adminUseCase.login(email, password);
         if (tokenPair) {
             const accessToken = (0, authUtils_1.generateAccessToken)({ email }, 'admin');
-            const refreshToken = (0, authUtils_1.generateRefreshToken)({ email });
-            res.cookie('accessToken', accessToken, { httpOnly: true });
-            res.status(200).json({ message: 'Admin login successful', refreshToken });
+            res.status(200).json({ message: 'Admin login successful', accessToken });
         }
         else {
             res.status(401).json({ error: 'Invalid credentials' });
@@ -33,3 +31,56 @@ const adminLoginController = (req, res) => __awaiter(void 0, void 0, void 0, fun
     }
 });
 exports.adminLoginController = adminLoginController;
+const getAllUsersController = (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        // Assuming you have a method in your AdminUseCase to get all users
+        const adminUseCase = new adminUseCase_1.DefaultAdminUseCase();
+        const users = yield adminUseCase.getAllUsers();
+        res.status(200).json(users);
+    }
+    catch (error) {
+        console.error('Error in getAllUsersController:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+exports.getAllUsersController = getAllUsersController;
+const editUserController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { userId } = req.params;
+        const updatedDetails = req.body;
+        const adminUseCase = new adminUseCase_1.DefaultAdminUseCase();
+        yield adminUseCase.editUserById(userId, updatedDetails);
+        res.status(200).json({ message: 'User updated successfully' });
+    }
+    catch (error) {
+        console.error('Error in editUserController:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+exports.editUserController = editUserController;
+const blockUserController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { userId } = req.params;
+        const adminUseCase = new adminUseCase_1.DefaultAdminUseCase();
+        yield adminUseCase.blockUser(userId);
+        res.status(200).json({ message: 'User blocked successfully' });
+    }
+    catch (error) {
+        console.error('Error in blockUserController:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+exports.blockUserController = blockUserController;
+const unblockUserController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { userId } = req.params;
+        const adminUseCase = new adminUseCase_1.DefaultAdminUseCase();
+        yield adminUseCase.unblockUser(userId);
+        res.status(200).json({ message: 'User unblocked successfully' });
+    }
+    catch (error) {
+        console.error('Error in unblockUserController:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+exports.unblockUserController = unblockUserController;

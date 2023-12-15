@@ -7,30 +7,33 @@ exports.tokenValidationMiddleware = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const tokenValidationMiddleware = (req, res, next) => {
     var _a;
-    const secretKey = process.env.JWT_SECRET || 'fallbackSecretKey';
+    const secretKey = process.env.JWT_SECRET || undefined;
+    if (!secretKey) {
+        console.error('JWT_SECRET is not defined in the environment variables.');
+        return res.status(500).json({ error: 'Internal Server Error' });
+    }
     const authHeaderToken = (_a = req.header('Authorization')) === null || _a === void 0 ? void 0 : _a.replace('Bearer ', '');
-    const cookieToken = req.cookies.accessToken;
-    const token = authHeaderToken || cookieToken;
-    const refreshToken = req.cookies.refreshToken;
-    if (!token && !refreshToken) {
-        res.status(401).json({ error: 'Unauthorized - Missing Token' });
-        return;
+    const token = authHeaderToken;
+    if (!token) {
+        return res.status(401).json({ error: 'Unauthorized - Missing Token' });
     }
     try {
-        const decoded = jsonwebtoken_1.default.verify(token, secretKey);
-        if (decoded.exp && Date.now() >= decoded.exp * 1000) {
-            const newToken = jsonwebtoken_1.default.sign({ userId: decoded.userId, email: decoded.email }, secretKey, {
-                expiresIn: '1h',
-            });
-            res.setHeader('Authorization', `Bearer ${newToken}`);
-            res.cookie('accessToken', newToken, { httpOnly: true });
+        const decoded = jsonwebtoken_1.default.decode(token);
+        if (!decoded) {
+            console.error('Invalid token content.');
+            return res.status(401).json({ error: 'Unauthorized - Invalid Token Content' });
         }
-        req.user = decoded;
-        next();
+        if (decoded.role === 'admin' || decoded.role === 'user') {
+            req.user = decoded;
+            next();
+        }
+        else {
+            return res.status(403).json({ error: 'Forbidden - Invalid Role' });
+        }
     }
     catch (error) {
         console.error('Error in token validation middleware:', error);
-        res.status(401).json({ error: 'Unauthorized - Invalid Token' });
+        return res.status(401).json({ error: 'Unauthorized - Invalid Token' });
     }
 };
 exports.tokenValidationMiddleware = tokenValidationMiddleware;

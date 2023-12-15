@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.resendOTPController = exports.googleLoginController = exports.loginController = exports.completeSignupController = exports.verifyOTPController = exports.sendOTPController = void 0;
+exports.changePasswordController = exports.updateProfileController = exports.resendOTPController = exports.googleLoginController = exports.loginController = exports.completeSignupController = exports.verifyOTPController = exports.sendOTPController = void 0;
 const userUseCase_1 = require("../../../usecase/userUseCase");
 const defaultOTPService_1 = require("../../../usecase/otp/defaultOTPService");
 const defaultOTPRepository_1 = __importDefault(require("../../../usecase/otp/defaultOTPRepository"));
@@ -76,16 +76,33 @@ const completeSignupController = (req, res) => __awaiter(void 0, void 0, void 0,
     }
 });
 exports.completeSignupController = completeSignupController;
+// Import necessary modules and classes
 const loginController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { email, password } = req.body;
         console.log('Received login credentials:', email, password);
         const userUseCase = new userUseCase_1.DefaultUserUseCase();
+        const user = yield userUseCase.getUserByEmail(email);
+        if (!user) {
+            res.status(401).json({ error: 'Invalid credentials' });
+            return;
+        }
         const tokens = yield userUseCase.login(email, password);
         if (tokens) {
             const isSecureCookie = process.env.COOKIE_SECURE === 'true';
-            res.cookie('accessToken', tokens.accessToken, { httpOnly: true, secure: isSecureCookie });
-            res.status(200).json({ message: 'Login successful', refreshToken: tokens.refreshToken });
+            res.status(200).json({
+                message: 'Login successful',
+                accessToken: (0, authUtils_1.generateAccessToken)(user, 'user'),
+                user: {
+                    userId: user._id,
+                    username: user.username,
+                    email: user.email,
+                    phoneNumber: user.phoneNumber,
+                    profileImage: user.profileImage,
+                    blocked: user.blocked,
+                    role: 'user',
+                },
+            });
         }
         else {
             res.status(401).json({ error: 'Invalid credentials' });
@@ -100,8 +117,8 @@ exports.loginController = loginController;
 const googleLoginController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     console.log('inside googleLoginController');
     try {
-        const { email, username, token } = req.body;
-        console.log('email, username', email, username);
+        const { _id, email, username, token } = req.body;
+        console.log('email, username,token', email, username, token);
         const userUseCase = new userUseCase_1.DefaultUserUseCase();
         const existingUser = yield userUseCase.getUserByEmail(email);
         console.log('existingUser', existingUser);
@@ -110,7 +127,8 @@ const googleLoginController = (req, res) => __awaiter(void 0, void 0, void 0, fu
             res.status(200).json({ message: 'Login successful', accessToken });
         }
         else {
-            const newUser = { email, username, password: token };
+            // Use the token as the user ID
+            const newUser = { _id: _id, email, username, password: token };
             yield userUseCase.createUserAfterVerification(newUser);
             const getUser = yield userUseCase.getUserByEmail(email);
             const accessToken = (0, authUtils_1.generateAccessToken)(getUser, 'user');
@@ -123,7 +141,6 @@ const googleLoginController = (req, res) => __awaiter(void 0, void 0, void 0, fu
     }
 });
 exports.googleLoginController = googleLoginController;
-// Inside userController.ts
 const resendOTPController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { email } = req.body;
@@ -132,8 +149,68 @@ const resendOTPController = (req, res) => __awaiter(void 0, void 0, void 0, func
         res.status(200).json({ message: 'Resent OTP successfully' });
     }
     catch (error) {
-        console.error('Error in resendOTPController:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 exports.resendOTPController = resendOTPController;
+const updateProfileController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const userId = req.params.userId;
+        // Check if userId is not defined
+        if (userId === undefined) {
+            res.status(400).json({ error: 'User ID is required' });
+            return;
+        }
+        const updatedData = req.body;
+        console.log('body', updatedData);
+        const userUseCase = new userUseCase_1.DefaultUserUseCase();
+        // Check if userId is a valid ObjectId, if not, consider it as a token
+        // if (!mongoose.Types.ObjectId.isValid(userId)) {
+        //   const user = await userUseCase.getUserByToken(userId);
+        //   if (!user || user._id === undefined) {
+        //     res.status(404).json({ error: 'User not found' });
+        //     return;
+        //   }
+        //   const updatedUser = await userUseCase.updateProfile(user._id, updatedData);
+        //   console.log('updatedUser ', updatedUser);
+        //   if (updatedUser) {
+        //     res.status(200).json(updatedUser);
+        //   } else {
+        //     res.status(404).json({ error: 'User not found' });
+        //   }
+        // } else 
+        {
+            const updatedUser = yield userUseCase.updateProfile(userId, updatedData);
+            console.log('updatedUser ', updatedUser);
+            if (updatedUser) {
+                res.status(200).json(updatedUser);
+            }
+            else {
+                res.status(404).json({ error: 'User not found' });
+            }
+        }
+    }
+    catch (error) {
+        console.error('Error in updateProfileController:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+exports.updateProfileController = updateProfileController;
+const changePasswordController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const userId = req.params.userId;
+        const { currentPassword, newPassword } = req.body;
+        const userUseCase = new userUseCase_1.DefaultUserUseCase();
+        const isPasswordChanged = yield userUseCase.changePassword(userId, currentPassword, newPassword);
+        if (isPasswordChanged) {
+            res.status(200).json({ message: 'Password changed successfully' });
+        }
+        else {
+            res.status(401).json({ error: 'Invalid current password' });
+        }
+    }
+    catch (error) {
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+exports.changePasswordController = changePasswordController;

@@ -8,4 +8,8 @@ const express_1 = __importDefault(require("express"));
 const adminController_1 = require("../controllers/adminController");
 const router = express_1.default.Router();
 router.post('/login', adminController_1.adminLoginController);
+router.get('/users', adminController_1.getAllUsersController);
+router.patch('/user/edit/:userId', adminController_1.editUserController);
+router.patch('/user/block/:userId', adminController_1.blockUserController);
+router.patch('/user/unblock/:userId', adminController_1.unblockUserController);
 exports.default = router;

@@ -1,9 +1,10 @@
 // src/usecase/userUseCase.ts
 import { UserDocument } from '../domain/entities/User';
 import UserRepository from '../infrastructure/database/repositories/userRepository';
-import { generateAccessToken, generateRefreshToken, comparePasswords, hashPassword } from '../infrastructure/utils/authUtils';
+import { generateAccessToken,  comparePasswords, hashPassword } from '../infrastructure/utils/authUtils';
 import { DefaultOTPService } from './otp/defaultOTPService';
 import InMemoryOTPRepository from './otp/defaultOTPRepository';
+// import userRepository from '../infrastructure/database/repositories/userRepository';
 
 export class DefaultUserUseCase {
   private otpService: DefaultOTPService;
@@ -13,6 +14,9 @@ export class DefaultUserUseCase {
     this.otpService = new DefaultOTPService(otpRepository);
   }
 
+  
+
+  
   async sendOTP(email: string): Promise<{ message: string }> {
     const otp = await this.otpService.sendOTP(email);
     return { message: 'OTP sent successfully' };
@@ -21,14 +25,16 @@ export class DefaultUserUseCase {
 
   async createUserAfterVerification(user: Omit<UserDocument, '_id'>): Promise<{ message: string }> {
     try {
-      // console.log('User before hashing password:', user);
-      const {email, password} = user;
+      const { email, password } = user;
       const hashedPassword = await hashPassword(password);
-      // console.log('Hashed Password:', hashedPassword);
-      const newUser = await UserRepository.create({...user,
+  
+      const newUser = await UserRepository.create({
+        ...user,
         email,
-        password: hashedPassword
-        });
+        password: hashedPassword,
+        role: 'user',
+      });
+  
       console.log('New User Created:', newUser);
       return { message: 'Signup successful' };
     } catch (error) {
@@ -36,7 +42,7 @@ export class DefaultUserUseCase {
       throw error;
     }
   }
-
+  
   async signUp(user: Omit<UserDocument, '_id'>): Promise<{ message: string }> {
     try {
       const otp = await this.otpService.sendOTP(user.email);
@@ -48,14 +54,13 @@ export class DefaultUserUseCase {
     }
   }
 
-  async login(email: string, password: string): Promise<{ accessToken: string; refreshToken: string } | null> {
+  async login(email: string, password: string): Promise<{ accessToken: string;} | null> {
     const existingUser = await UserRepository.findOne({ email });
 
     if (existingUser && (await comparePasswords(password, existingUser.password))) {
       const accessToken = generateAccessToken(existingUser ,'user');
-      const refreshToken = generateRefreshToken(existingUser);
        
-      return { accessToken, refreshToken };
+      return {accessToken};
     } else {
       return null;
     }
@@ -74,4 +79,59 @@ export class DefaultUserUseCase {
       throw new Error('Error resending OTP');
     }
   }
+
+  async updateProfile(userId: string, updatedData: Partial<UserDocument>): Promise<UserDocument | null> {
+    try {
+      const user = await UserRepository.findOne({ _id: userId });
+    
+      if (!user) {
+        console.log('User not found');
+        return null;
+      }
+    
+      console.log('Updating user:', user);
+   
+      Object.assign(user, updatedData);
+   
+      const updatedUser = await user.save();
+      console.log('Updated user:', updatedUser);
+    
+      return updatedUser;
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      throw error;
+    }
+  }
+  
+  
+  
+
+  async changePassword(userId: string, currentPassword: string, newPassword: string): Promise<boolean> {
+    try {
+      const user = await UserRepository.findOne({ _id: userId });
+
+      if (!user) {
+        return false; 
+      }
+
+      const isCurrentPasswordValid = await comparePasswords(currentPassword, user.password);
+
+      if (!isCurrentPasswordValid) {
+        return false;
+      }
+
+      user.password = await hashPassword(newPassword);
+      await user.save();
+
+      return true; 
+    } catch (error) {
+      console.error('Error changing password:', error);
+      throw error;
+    }
+  }
+
+  async getUserByToken(token: string): Promise<UserDocument | null> {
+    return UserRepository.findOne({ _id: token });
+  }
+  
 }
