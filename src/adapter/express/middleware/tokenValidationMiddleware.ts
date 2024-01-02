@@ -1,13 +1,15 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt, { Secret, JwtPayload } from 'jsonwebtoken';
+export interface ExtendedRequest extends Request {
+  user?: JwtPayload;
+}
 
 export const tokenValidationMiddleware = (
-  req: Request,
+  req: ExtendedRequest,
   res: Response,
   next: NextFunction
 ): void | Response<any, Record<string, any>> => {
   const secretKey: Secret | undefined = process.env.JWT_SECRET || undefined;
-
 
   if (!secretKey) {
     console.error('JWT_SECRET is not defined in the environment variables.');
@@ -32,7 +34,9 @@ export const tokenValidationMiddleware = (
 
 
     if (decoded.role === 'admin' || decoded.role === 'user') {
-      (req as any).user = decoded;
+      console.log('decoded',decoded);
+      
+      req.user = decoded;
       next();
     } else {
 

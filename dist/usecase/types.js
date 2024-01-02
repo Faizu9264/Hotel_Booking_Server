@@ -5,5 +5,6 @@ exports.TYPES = void 0;
 const TYPES = {
     HotelService: Symbol.for('HotelService'),
     RoomService: Symbol.for('RoomService'),
+    BookingService: Symbol.for('BookingService'),
 };
 exports.TYPES = TYPES;

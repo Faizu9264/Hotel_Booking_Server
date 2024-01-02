@@ -4,7 +4,7 @@ import { AdminUseCase } from '../../../usecase/interfaces/AdminUseCase';
 import { DefaultAdminUseCase } from '../../../usecase/adminUseCase';
 import { generateAccessToken } from '../../../infrastructure/utils/authUtils';
 import { AdminDocument } from '../../../domain/entities/Admin';
-import { UserDocument } from '../../../domain/entities/User'; 
+
 
 export const adminLoginController = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -15,8 +15,8 @@ export const adminLoginController = async (req: Request, res: Response): Promise
 
     if (tokenPair) {
       const accessToken = generateAccessToken({ email } as AdminDocument ,'admin');
-  
-      res.status(200).json({ message: 'Admin login successful',accessToken});
+      const admin = await adminUseCase.getAdminByEmail(email); 
+      res.status(200).json({ message: 'Admin login successful',admin,accessToken});
     } else {
       res.status(401).json({ error: 'Invalid credentials' });
     }
@@ -29,10 +29,9 @@ export const adminLoginController = async (req: Request, res: Response): Promise
 
 export const getAllUsersController = async (_req: Request, res: Response): Promise<void> => {
   try {
-    // Assuming you have a method in your AdminUseCase to get all users
     const adminUseCase: AdminUseCase = new DefaultAdminUseCase();
     const users = await adminUseCase.getAllUsers();
-
+    
     res.status(200).json(users);
   } catch (error) {
     console.error('Error in getAllUsersController:', error);

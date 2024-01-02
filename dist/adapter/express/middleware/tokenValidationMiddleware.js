@@ -24,6 +24,7 @@ const tokenValidationMiddleware = (req, res, next) => {
             return res.status(401).json({ error: 'Unauthorized - Invalid Token Content' });
         }
         if (decoded.role === 'admin' || decoded.role === 'user') {
+            console.log('decoded', decoded);
             req.user = decoded;
             next();
         }

@@ -1,10 +1,13 @@
-// src/adapter/express/controllers/userController.ts
 import { Request, Response } from 'express';
 import { DefaultUserUseCase } from '../../../usecase/userUseCase';
 import { DefaultOTPService } from '../../../usecase/otp/defaultOTPService';
 import InMemoryOTPRepository from '../../../usecase/otp/defaultOTPRepository';
-import { generateAccessToken, comparePasswords, hashPassword } from '../../../infrastructure/utils/authUtils';
-import mongoose from 'mongoose';
+import { generateAccessToken } from '../../../infrastructure/utils/authUtils';
+import { createBookingController } from './bookingController';
+import NodeCache from 'node-cache';
+
+// Initialize the cache
+const cache = new NodeCache();
 
 const otpRepository = new InMemoryOTPRepository(); 
 const otpService = new DefaultOTPService(otpRepository);
@@ -127,7 +130,22 @@ export const googleLoginController = async (req: Request, res: Response): Promis
 
     if (existingUser) {
       const accessToken = generateAccessToken(existingUser, 'user');
-      res.status(200).json({ message: 'Login successful', accessToken });
+      const user = await userUseCase.getUserByEmail(email); 
+
+    if (!user) {
+      res.status(401).json({ error: 'Invalid credentials' });
+      return;
+    }
+      res.status(200).json({ message: 'Login successful', accessToken,
+      user: {
+        userId: user._id,
+        username: user.username,
+        email: user.email,      
+        phoneNumber:user.phoneNumber,
+        profileImage:user.profileImage,
+        blocked:user.blocked,
+        role: 'user', 
+      }, });
     } else {
       // Use the token as the user ID
       const newUser = { _id: _id, email, username, password: token };
@@ -135,8 +153,21 @@ export const googleLoginController = async (req: Request, res: Response): Promis
       await userUseCase.createUserAfterVerification(newUser as any);
       const getUser = await userUseCase.getUserByEmail(email);
       const accessToken = generateAccessToken(getUser as any, 'user');
-
-      res.status(201).json({ message: 'Signup successful', accessToken });
+      const user = await userUseCase.getUserByEmail(email); 
+      if (!user) {
+        res.status(401).json({ error: 'Invalid credentials' });
+        return;
+      }
+      res.status(201).json({ message: 'Signup successful', accessToken ,
+      user: {
+        userId: user._id,
+        username: user.username,
+        email: user.email,      
+        phoneNumber:user.phoneNumber,
+        profileImage:user.profileImage,
+        blocked:user.blocked,
+        role: 'user', 
+      },});
     }
   } catch (error) {
     console.error('Error in googleLoginController:', error);
@@ -176,26 +207,7 @@ export const updateProfileController = async (req: Request, res: Response): Prom
 
     const userUseCase = new DefaultUserUseCase();
 
-    // Check if userId is a valid ObjectId, if not, consider it as a token
-    // if (!mongoose.Types.ObjectId.isValid(userId)) {
-
-    //   const user = await userUseCase.getUserByToken(userId);
-
-    //   if (!user || user._id === undefined) {
-    //     res.status(404).json({ error: 'User not found' });
-    //     return;
-    //   }
-      
-
-    //   const updatedUser = await userUseCase.updateProfile(user._id, updatedData);
-    //   console.log('updatedUser ', updatedUser);
-
-    //   if (updatedUser) {
-    //     res.status(200).json(updatedUser);
-    //   } else {
-    //     res.status(404).json({ error: 'User not found' });
-    //   }
-    // } else 
+   
     {
       const updatedUser = await userUseCase.updateProfile(userId, updatedData);
       console.log('updatedUser ', updatedUser);
@@ -230,3 +242,114 @@ export const changePasswordController = async (req: Request, res: Response): Pro
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
+
+// export const checkoutController = async (req: Request, res: Response): Promise<void> => {
+//   try {
+//     const { bookingDetails, currency,userId } = req.body;
+//     const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+//     console.log('req.body', req.body);
+
+//     const USER_DOMAIN = process.env.USER_DOMAIN;
+//     const formatDate = (dateString:Date) => {
+//       const date = new Date(dateString);
+//       const day = date.getDate().toString().padStart(2, '0');
+//       const month = (date.getMonth() + 1).toString().padStart(2, '0'); 
+//       const year = date.getFullYear().toString().slice(2, 4);
+//       return `${day}/${month}/${year}`;
+//     };
+
+//     const formattedCheckInDate = formatDate(bookingDetails.checkInDate);
+//     const formattedCheckOutDate = formatDate(bookingDetails.checkOutDate);
+
+//     const Description = `${formattedCheckInDate} to ${formattedCheckOutDate}, ${bookingDetails.adultCount} adults, ${bookingDetails.childrenCount} children`;
+//     const product = await stripe.products.create({
+//       name: bookingDetails.roomDetails.roomType,
+//       images: bookingDetails.roomDetails.images,
+//       description: Description,
+//     });
+//     const price = await stripe.prices.create({
+//       unit_amount: bookingDetails.total * 100,
+//       currency: currency,
+//       product: product.id,  
+//     });
+
+//     const session = await stripe.checkout.sessions.create({
+//       payment_method_types: ['card'],
+//       line_items: [
+//         {
+//           price: price.id,
+//           quantity: 1,
+//         },
+//       ],
+//       mode: 'payment',
+//       success_url: `${USER_DOMAIN}/payment/success?success=true`,
+//       cancel_url: `${USER_DOMAIN}/payment/failed`,
+//     });
+    
+//     res.status(200).json({ sessionId: session.id ,bookingDetails});
+//   } catch (error: any) {
+//     console.error('Error creating checkout session:', error.message);
+//     res.status(500).json({ error: 'Internal Server Error' });
+//   }
+// };
+
+// src/adapter/express/controllers/userController.ts
+
+export const checkoutController = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { bookingDetails, currency, userId } = req.body;
+    console.log('checkout body',req.body);
+    
+    const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+
+    const USER_DOMAIN = process.env.USER_DOMAIN;
+    const formatDate = (dateString: Date) => {
+      const date = new Date(dateString);
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const year = date.getFullYear().toString().slice(2, 4);
+      return `${day}/${month}/${year}`;
+    };
+
+    const formattedCheckInDate = formatDate(bookingDetails.checkInDate);
+    const formattedCheckOutDate = formatDate(bookingDetails.checkOutDate);
+    
+    const description = `${formattedCheckInDate} to ${formattedCheckOutDate}, ${bookingDetails.adultCount} adults, ${bookingDetails.childrenCount} children`;
+
+     req.app.locals.CheckoutBody = req.body;
+
+    const product = await stripe.products.create({
+      name: bookingDetails.roomDetails.roomType,
+      images: bookingDetails.roomDetails.images.map(String),
+      description: String(description).slice(0, 500),
+    });
+
+    const price = await stripe.prices.create({
+      unit_amount: bookingDetails.total * 100,
+      currency: currency,
+      product: product.id,
+    });
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price: price.id,
+          quantity: 1,
+        },
+      ],
+      mode: 'payment',
+      success_url: `${USER_DOMAIN}/payment/success?success=true`,
+      cancel_url: `${USER_DOMAIN}/payment/failed`,
+    });
+
+    res.status(200).json({ sessionId: session.id, bookingDetails });
+  } catch (error: any) {
+    console.error('Error creating checkout session:', error.message);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+
+

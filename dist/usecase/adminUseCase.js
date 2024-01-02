@@ -87,6 +87,11 @@ class DefaultAdminUseCase {
             }
         });
     }
+    getAdminByEmail(email) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return adminRepository_1.default.findOne({ email });
+        });
+    }
     unblockUser(userId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {

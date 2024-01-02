@@ -7,7 +7,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 require("reflect-metadata");
 const app_1 = __importDefault(require("./adapter/express/app"));
 const config_1 = require("./infrastructure/config");
-// Load environment variables
 require('dotenv').config();
 // Connect to MongoDB
 (0, config_1.connectToDatabase)();

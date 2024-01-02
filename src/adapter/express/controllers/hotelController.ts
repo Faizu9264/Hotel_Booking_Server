@@ -23,6 +23,7 @@ export const createHotelController = async (req: Request, res: Response): Promis
 };
 
 export const getAllHotelsController = async (_req: Request, res: Response): Promise<void> => {
+  
   try {
     const allHotels = await hotelUseCase.getAllHotels();
     res.status(200).json(allHotels);

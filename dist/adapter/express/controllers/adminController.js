@@ -19,7 +19,8 @@ const adminLoginController = (req, res) => __awaiter(void 0, void 0, void 0, fun
         const tokenPair = yield adminUseCase.login(email, password);
         if (tokenPair) {
             const accessToken = (0, authUtils_1.generateAccessToken)({ email }, 'admin');
-            res.status(200).json({ message: 'Admin login successful', accessToken });
+            const admin = yield adminUseCase.getAdminByEmail(email);
+            res.status(200).json({ message: 'Admin login successful', admin, accessToken });
         }
         else {
             res.status(401).json({ error: 'Invalid credentials' });
@@ -33,7 +34,6 @@ const adminLoginController = (req, res) => __awaiter(void 0, void 0, void 0, fun
 exports.adminLoginController = adminLoginController;
 const getAllUsersController = (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        // Assuming you have a method in your AdminUseCase to get all users
         const adminUseCase = new adminUseCase_1.DefaultAdminUseCase();
         const users = yield adminUseCase.getAllUsers();
         res.status(200).json(users);

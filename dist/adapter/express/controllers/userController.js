@@ -12,11 +12,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.changePasswordController = exports.updateProfileController = exports.resendOTPController = exports.googleLoginController = exports.loginController = exports.completeSignupController = exports.verifyOTPController = exports.sendOTPController = void 0;
+exports.checkoutController = exports.changePasswordController = exports.updateProfileController = exports.resendOTPController = exports.googleLoginController = exports.loginController = exports.completeSignupController = exports.verifyOTPController = exports.sendOTPController = void 0;
 const userUseCase_1 = require("../../../usecase/userUseCase");
 const defaultOTPService_1 = require("../../../usecase/otp/defaultOTPService");
 const defaultOTPRepository_1 = __importDefault(require("../../../usecase/otp/defaultOTPRepository"));
 const authUtils_1 = require("../../../infrastructure/utils/authUtils");
+const node_cache_1 = __importDefault(require("node-cache"));
+// Initialize the cache
+const cache = new node_cache_1.default();
 const otpRepository = new defaultOTPRepository_1.default();
 const otpService = new defaultOTPService_1.DefaultOTPService(otpRepository);
 const sendOTPController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -124,7 +127,21 @@ const googleLoginController = (req, res) => __awaiter(void 0, void 0, void 0, fu
         console.log('existingUser', existingUser);
         if (existingUser) {
             const accessToken = (0, authUtils_1.generateAccessToken)(existingUser, 'user');
-            res.status(200).json({ message: 'Login successful', accessToken });
+            const user = yield userUseCase.getUserByEmail(email);
+            if (!user) {
+                res.status(401).json({ error: 'Invalid credentials' });
+                return;
+            }
+            res.status(200).json({ message: 'Login successful', accessToken,
+                user: {
+                    userId: user._id,
+                    username: user.username,
+                    email: user.email,
+                    phoneNumber: user.phoneNumber,
+                    profileImage: user.profileImage,
+                    blocked: user.blocked,
+                    role: 'user',
+                }, });
         }
         else {
             // Use the token as the user ID
@@ -132,7 +149,21 @@ const googleLoginController = (req, res) => __awaiter(void 0, void 0, void 0, fu
             yield userUseCase.createUserAfterVerification(newUser);
             const getUser = yield userUseCase.getUserByEmail(email);
             const accessToken = (0, authUtils_1.generateAccessToken)(getUser, 'user');
-            res.status(201).json({ message: 'Signup successful', accessToken });
+            const user = yield userUseCase.getUserByEmail(email);
+            if (!user) {
+                res.status(401).json({ error: 'Invalid credentials' });
+                return;
+            }
+            res.status(201).json({ message: 'Signup successful', accessToken,
+                user: {
+                    userId: user._id,
+                    username: user.username,
+                    email: user.email,
+                    phoneNumber: user.phoneNumber,
+                    profileImage: user.profileImage,
+                    blocked: user.blocked,
+                    role: 'user',
+                }, });
         }
     }
     catch (error) {
@@ -164,21 +195,6 @@ const updateProfileController = (req, res) => __awaiter(void 0, void 0, void 0, 
         const updatedData = req.body;
         console.log('body', updatedData);
         const userUseCase = new userUseCase_1.DefaultUserUseCase();
-        // Check if userId is a valid ObjectId, if not, consider it as a token
-        // if (!mongoose.Types.ObjectId.isValid(userId)) {
-        //   const user = await userUseCase.getUserByToken(userId);
-        //   if (!user || user._id === undefined) {
-        //     res.status(404).json({ error: 'User not found' });
-        //     return;
-        //   }
-        //   const updatedUser = await userUseCase.updateProfile(user._id, updatedData);
-        //   console.log('updatedUser ', updatedUser);
-        //   if (updatedUser) {
-        //     res.status(200).json(updatedUser);
-        //   } else {
-        //     res.status(404).json({ error: 'User not found' });
-        //   }
-        // } else 
         {
             const updatedUser = yield userUseCase.updateProfile(userId, updatedData);
             console.log('updatedUser ', updatedUser);
@@ -214,3 +230,95 @@ const changePasswordController = (req, res) => __awaiter(void 0, void 0, void 0,
     }
 });
 exports.changePasswordController = changePasswordController;
+// export const checkoutController = async (req: Request, res: Response): Promise<void> => {
+//   try {
+//     const { bookingDetails, currency,userId } = req.body;
+//     const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+//     console.log('req.body', req.body);
+//     const USER_DOMAIN = process.env.USER_DOMAIN;
+//     const formatDate = (dateString:Date) => {
+//       const date = new Date(dateString);
+//       const day = date.getDate().toString().padStart(2, '0');
+//       const month = (date.getMonth() + 1).toString().padStart(2, '0'); 
+//       const year = date.getFullYear().toString().slice(2, 4);
+//       return `${day}/${month}/${year}`;
+//     };
+//     const formattedCheckInDate = formatDate(bookingDetails.checkInDate);
+//     const formattedCheckOutDate = formatDate(bookingDetails.checkOutDate);
+//     const Description = `${formattedCheckInDate} to ${formattedCheckOutDate}, ${bookingDetails.adultCount} adults, ${bookingDetails.childrenCount} children`;
+//     const product = await stripe.products.create({
+//       name: bookingDetails.roomDetails.roomType,
+//       images: bookingDetails.roomDetails.images,
+//       description: Description,
+//     });
+//     const price = await stripe.prices.create({
+//       unit_amount: bookingDetails.total * 100,
+//       currency: currency,
+//       product: product.id,  
+//     });
+//     const session = await stripe.checkout.sessions.create({
+//       payment_method_types: ['card'],
+//       line_items: [
+//         {
+//           price: price.id,
+//           quantity: 1,
+//         },
+//       ],
+//       mode: 'payment',
+//       success_url: `${USER_DOMAIN}/payment/success?success=true`,
+//       cancel_url: `${USER_DOMAIN}/payment/failed`,
+//     });
+//     res.status(200).json({ sessionId: session.id ,bookingDetails});
+//   } catch (error: any) {
+//     console.error('Error creating checkout session:', error.message);
+//     res.status(500).json({ error: 'Internal Server Error' });
+//   }
+// };
+// src/adapter/express/controllers/userController.ts
+const checkoutController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { bookingDetails, currency, userId } = req.body;
+        console.log('checkout body', req.body);
+        const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+        const USER_DOMAIN = process.env.USER_DOMAIN;
+        const formatDate = (dateString) => {
+            const date = new Date(dateString);
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const year = date.getFullYear().toString().slice(2, 4);
+            return `${day}/${month}/${year}`;
+        };
+        const formattedCheckInDate = formatDate(bookingDetails.checkInDate);
+        const formattedCheckOutDate = formatDate(bookingDetails.checkOutDate);
+        const description = `${formattedCheckInDate} to ${formattedCheckOutDate}, ${bookingDetails.adultCount} adults, ${bookingDetails.childrenCount} children`;
+        req.app.locals.CheckoutBody = req.body;
+        const product = yield stripe.products.create({
+            name: bookingDetails.roomDetails.roomType,
+            images: bookingDetails.roomDetails.images.map(String),
+            description: String(description).slice(0, 500),
+        });
+        const price = yield stripe.prices.create({
+            unit_amount: bookingDetails.total * 100,
+            currency: currency,
+            product: product.id,
+        });
+        const session = yield stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            line_items: [
+                {
+                    price: price.id,
+                    quantity: 1,
+                },
+            ],
+            mode: 'payment',
+            success_url: `${USER_DOMAIN}/payment/success?success=true`,
+            cancel_url: `${USER_DOMAIN}/payment/failed`,
+        });
+        res.status(200).json({ sessionId: session.id, bookingDetails });
+    }
+    catch (error) {
+        console.error('Error creating checkout session:', error.message);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+exports.checkoutController = checkoutController;

@@ -3,7 +3,7 @@ import 'reflect-metadata';
 import app from './adapter/express/app';
 import { connectToDatabase } from './infrastructure/config';
 
-// Load environment variables
+
 require('dotenv').config();
 
 // Connect to MongoDB

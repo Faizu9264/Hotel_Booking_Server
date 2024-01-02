@@ -7,6 +7,6 @@ export interface AdminDocument extends Document {
   password: string;
 }
 export interface TokenPayload {
-  userId: string;
+  _id: string;
   email: string;
 }

@@ -73,7 +73,9 @@ export class DefaultAdminUseCase implements AdminUseCase {
       throw error;
     }
   }
-
+  async getAdminByEmail(email: string): Promise<UserDocument | null> {
+    return AdminRepository.findOne({ email });
+  }
   async unblockUser(userId: string): Promise<void> {
     try {
       // Find the user by ID

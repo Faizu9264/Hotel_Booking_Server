@@ -1,11 +1,4 @@
 "use strict";
-// // src/infrastructure/database/repositories/userRepository.ts
-// import UserModel, { UserDocument } from '../models/userModel';
-// class UserRepository {
-//   async create(user: Omit<UserDocument, '_id'>): Promise<UserDocument> {
-//     const newUser = new UserModel(user);
-//     return newUser.save();
-//   }
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -19,11 +12,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-//   async findOne(query: Record<string, any>): Promise<UserDocument | null> {
-//     return UserModel.findOne(query).exec();
-//   }
-// }
-// export default new UserRepository();
 // src/infrastructure/database/repositories/userRepository.ts
 const userModel_1 = __importDefault(require("../models/userModel"));
 const mongoose_1 = __importDefault(require("mongoose"));
