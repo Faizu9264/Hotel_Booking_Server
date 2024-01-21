@@ -25,49 +25,42 @@ export class SocketManager {
     this.io.on("connection", this.handleConnection);
   }
 
-  private handleConnection = (socket: Socket): void => { 
- 
-    socket.on("addUser",(userId:string)=>{ 
-      this.addUser(userId,socket.id) 
-      console.log(this.users) 
-    }) 
- 
- 
-    socket.on("blocked", async ({userId}: { userId:string }) => { 
-      let blockedUser = this.getUser(userId) 
-      let user = await this.userRepository.findOne({ _id: userId }) 
-      console.log('user',user);
-      console.log('blockedUser ',blockedUser );
-      
-      
-      if(user && user._id && blockedUser){ 
-        this.io.to(blockedUser.socketId).emit("responseIsBlocked", {blocked:user.blocked}); 
-      } 
-    }); 
- 
-    socket.on("disconnect", () => { 
-      this.removeUser(socket.id); 
-      console.log("a user disconnected!"); 
-    }); 
-  }; 
- 
-  private addUser(userId: string, socketId: string): void { 
-    if (!this.users.some((user) => user.userId === userId)) { 
-      this.users.push({ userId, socketId }); 
-    } 
-  } 
- 
-  private removeUser(socketId: string): void { 
-    this.users = this.users.filter((user) => user.socketId !== socketId); 
-  } 
- 
-  private getUser(userId: string): User | undefined { 
-    return this.users.find((user) => user.userId === userId); 
-  } 
- 
-//   start = (): void => { 
-//     this.httpServer.listen(3000, () => { 
-//       console.log("Socket server listening on port 6005"); 
-//     }); 
-//   }; 
+  private handleConnection = (socket: Socket): void => {
+    socket.on("addUser", (userId: string) => {
+      this.addUser(userId, socket.id);
+      console.log(this.users);
+    });
+
+    socket.on("blocked", async ({ userId }: { userId: string }) => {
+      let blockedUser = this.getUser(userId);
+      let user = await this.userRepository.findOne({ _id: userId });
+      console.log("user", user);
+      console.log("blockedUser ", blockedUser);
+
+      if (user && user._id && blockedUser) {
+        this.io
+          .to(blockedUser.socketId)
+          .emit("responseIsBlocked", { blocked: user.blocked });
+      }
+    });
+
+    socket.on("disconnect", () => {
+      this.removeUser(socket.id);
+      console.log("a user disconnected!");
+    });
+  };
+
+  private addUser(userId: string, socketId: string): void {
+    if (!this.users.some((user) => user.userId === userId)) {
+      this.users.push({ userId, socketId });
+    }
+  }
+
+  private removeUser(socketId: string): void {
+    this.users = this.users.filter((user) => user.socketId !== socketId);
+  }
+
+  private getUser(userId: string): User | undefined {
+    return this.users.find((user) => user.userId === userId);
+  }
 }

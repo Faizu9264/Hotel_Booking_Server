@@ -20,17 +20,16 @@ class DefaultAdminUseCase {
     login(email, password) {
         return __awaiter(this, void 0, void 0, function* () {
             const admin = yield adminRepository_1.default.findOne({ email: email.toLowerCase() });
-            console.log('Admin:', admin);
-            console.log('Entered password:', password);
-            console.log('Hashed password in the database:', admin === null || admin === void 0 ? void 0 : admin.password);
+            console.log("Admin:", admin);
+            console.log("Entered password:", password);
+            console.log("Hashed password in the database:", admin === null || admin === void 0 ? void 0 : admin.password);
             if (admin) {
-                console.log('Entered password:', password);
-                console.log('Hashed password in the database:', admin.password);
+                console.log("Entered password:", password);
+                console.log("Hashed password in the database:", admin.password);
                 const isPasswordMatch = yield (0, authUtils_1.comparePasswords)(password, admin.password);
-                console.log('Password match result:', isPasswordMatch);
+                console.log("Password match result:", isPasswordMatch);
                 if (isPasswordMatch) {
-                    // Passwords match, generate tokens
-                    const accessToken = (0, authUtils_1.generateAccessToken)(admin, 'admin');
+                    const accessToken = (0, authUtils_1.generateAccessToken)(admin, "admin");
                     return { accessToken };
                 }
                 else {
@@ -49,7 +48,7 @@ class DefaultAdminUseCase {
                 return users;
             }
             catch (error) {
-                console.error('Error getting all users:', error);
+                console.error("Error getting all users:", error);
                 throw error;
             }
         });
@@ -60,7 +59,7 @@ class DefaultAdminUseCase {
                 yield userRepository_1.default.findByIdAndUpdate(userId, updatedDetails);
             }
             catch (error) {
-                console.error('Error editing user:', error);
+                console.error("Error editing user:", error);
                 throw error;
             }
         });
@@ -68,21 +67,17 @@ class DefaultAdminUseCase {
     blockUser(userId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                // Find the user by ID
                 const user = yield userRepository_1.default.findOne({ _id: userId });
-                // Check if the user exists
                 if (!user) {
                     throw new Error(`User with ID ${userId} not found`);
                 }
-                // Check if the user is already blocked
                 if (user.blocked) {
                     throw new Error(`User with ID ${userId} is already blocked`);
                 }
-                // Update the user's blocked status to true
                 yield userRepository_1.default.findByIdAndUpdate(userId, { blocked: true });
             }
             catch (error) {
-                console.error('Error blocking user:', error);
+                console.error("Error blocking user:", error);
                 throw error;
             }
         });
@@ -95,21 +90,29 @@ class DefaultAdminUseCase {
     unblockUser(userId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                // Find the user by ID
                 const user = yield userRepository_1.default.findOne({ _id: userId });
                 if (!user) {
                     throw new Error(`User with ID ${userId} not found`);
                 }
-                // Check if the user is already unblocked
                 if (!user.blocked) {
                     throw new Error(`User with ID ${userId} is not blocked`);
                 }
-                // Update the user's blocked status to false
                 yield userRepository_1.default.findByIdAndUpdate(userId, { blocked: false });
             }
             catch (error) {
-                console.error('Error unblocking user:', error);
+                console.error("Error unblocking user:", error);
                 throw error;
+            }
+        });
+    }
+    addToWallet(userId, amount, payment_method) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                yield userRepository_1.default.updateWallet(userId, amount, payment_method);
+            }
+            catch (error) {
+                console.error("Error updating user wallet:", error);
+                throw new Error("Error updating user wallet");
             }
         });
     }

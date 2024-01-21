@@ -1,14 +1,15 @@
 // src/infrastructure/database/index.ts
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 export const connectToDatabase = () => {
   const uri = process.env.MONGODB_URI as string;
 
-  mongoose.connect(uri)
+  mongoose
+    .connect(uri)
     .then(() => {
-      console.log('Connected to MongoDB');
+      console.log("Connected to MongoDB");
     })
     .catch((error) => {
-      console.error('Error connecting to MongoDB:', error);
+      console.error("Error connecting to MongoDB:", error);
     });
 };

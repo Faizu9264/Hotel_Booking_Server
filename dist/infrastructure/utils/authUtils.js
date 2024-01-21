@@ -16,11 +16,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.comparePasswords = exports.hashPassword = exports.generateAccessToken = exports.secretKey = void 0;
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-exports.secretKey = process.env.JWT_SECRET || 'fallbackSecretKey';
+exports.secretKey = process.env.JWT_SECRET || "fallbackSecretKey";
 const generateAccessToken = (user, role) => {
     var _a;
     const token = jsonwebtoken_1.default.sign({ userId: (_a = user._id) === null || _a === void 0 ? void 0 : _a.toString(), email: user.email, role }, exports.secretKey, {
-        expiresIn: '1h',
+        expiresIn: "1h",
     });
     return token;
 };

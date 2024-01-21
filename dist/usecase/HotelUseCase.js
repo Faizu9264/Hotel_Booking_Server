@@ -41,14 +41,29 @@ let HotelUseCase = class HotelUseCase {
     updateHotel(hotelId, updatedDetails) {
         return __awaiter(this, void 0, void 0, function* () {
             const updatedHotel = yield this.hotelService.updateHotel(hotelId, updatedDetails);
-            console.log('updatedHotel', updatedHotel);
+            console.log("updatedHotel", updatedHotel);
             return updatedHotel;
+        });
+    }
+    addReview(hotelId, review) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.hotelService.addReview(hotelId, review);
+        });
+    }
+    getAllReviews() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const reviewsWithHotelId = yield this.hotelService.getAllReviews();
+            const allReviews = reviewsWithHotelId.flatMap((item) => {
+                const hotelId = item.hotelId;
+                return (item.reviews || []).map((review) => (Object.assign(Object.assign({}, review), { hotelId })));
+            });
+            return allReviews;
         });
     }
 };
 exports.HotelUseCase = HotelUseCase;
 exports.HotelUseCase = HotelUseCase = __decorate([
     (0, inversify_1.injectable)(),
-    __param(0, (0, inversify_1.inject)('HotelService')),
+    __param(0, (0, inversify_1.inject)("HotelService")),
     __metadata("design:paramtypes", [Object])
 ], HotelUseCase);

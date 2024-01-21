@@ -1,4 +1,4 @@
-import { Document, Types } from 'mongoose';
+import { Document, Types } from "mongoose";
 
 export class Booking extends Document {
   constructor(
@@ -21,6 +21,9 @@ export class Booking extends Document {
     public HotelId: string,
     public BookingStatus: string,
     public userId: string,
+    public couponId: string,
+    public paymentMethod: string,
+    public wallet: number
   ) {
     super();
   }

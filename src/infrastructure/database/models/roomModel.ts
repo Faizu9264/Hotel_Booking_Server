@@ -1,6 +1,6 @@
 // src/infrastructure/database/models/roomModel.ts
-import mongoose, { Schema, Document } from 'mongoose';
-import { Room } from '../../../domain/entities/Room';
+import mongoose, { Schema, Document } from "mongoose";
+import { Room } from "../../../domain/entities/Room";
 
 const roomSchema = new Schema({
   roomType: { type: String, required: true },
@@ -16,4 +16,4 @@ const roomSchema = new Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-export default mongoose.model<Document & Room>('Room', roomSchema);
+export default mongoose.model<Document & Room>("Room", roomSchema);

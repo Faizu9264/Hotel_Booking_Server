@@ -25,6 +25,13 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 // src/infrastructure/database/models/hotelModel.ts
 const mongoose_1 = __importStar(require("mongoose"));
+const reviewSchema = new mongoose_1.Schema({
+    userId: { type: String, required: true },
+    rating: { type: Number, required: true },
+    comment: { type: String, required: true },
+    reviewText: { type: String, required: true },
+    date: { type: Date, default: Date.now },
+});
 const hotelSchema = new mongoose_1.Schema({
     location: {
         lat: { type: Number, required: true },
@@ -39,6 +46,7 @@ const hotelSchema = new mongoose_1.Schema({
         description: { type: String, required: true },
     },
     images: { type: [String], default: [] },
+    reviews: { type: [reviewSchema], default: [] },
     createdAt: { type: Date, default: Date.now },
 });
-exports.default = mongoose_1.default.model('Hotel', hotelSchema);
+exports.default = mongoose_1.default.model("Hotel", hotelSchema);

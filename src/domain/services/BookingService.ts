@@ -1,5 +1,5 @@
 // src/domain/services/BookingService.ts
-import { Booking } from '../entities/Booking';
+import { Booking } from "../entities/Booking";
 
 export interface BookingService {
   createBooking(booking: Booking): Promise<Booking>;

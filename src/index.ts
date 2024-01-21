@@ -1,12 +1,10 @@
 // src/index.ts
-import 'reflect-metadata';
-import app from './adapter/express/app';
-import { connectToDatabase } from './infrastructure/config';
+import "reflect-metadata";
+import app from "./adapter/express/app";
+import { connectToDatabase } from "./infrastructure/config";
 
+require("dotenv").config();
 
-require('dotenv').config();
-
-// Connect to MongoDB
 connectToDatabase();
 
 const PORT = process.env.PORT || 5000;

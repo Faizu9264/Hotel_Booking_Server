@@ -43,5 +43,27 @@ class UserRepository {
             yield this.userModel.findByIdAndUpdate(userId, updatedDetails).exec();
         });
     }
+    updateWallet(userId, amount, paymentMethod) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const date = new Date();
+            yield this.userModel
+                .findByIdAndUpdate(userId, {
+                $inc: { wallet: amount },
+                $push: { walletTransactions: { amount, paymentMethod, date } },
+            })
+                .exec();
+        });
+    }
+    deductMoneyFromWallet(userId, amount, paymentMethod) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const date = new Date();
+            yield this.userModel
+                .findByIdAndUpdate(userId, {
+                $inc: { wallet: -amount },
+                $push: { walletTransactions: { amount: -amount, paymentMethod, date } },
+            })
+                .exec();
+        });
+    }
 }
 exports.default = new UserRepository();

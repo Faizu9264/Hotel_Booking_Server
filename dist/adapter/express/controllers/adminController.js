@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.unblockUserController = exports.blockUserController = exports.editUserController = exports.getAllUsersController = exports.adminLoginController = void 0;
+exports.RefundController = exports.unblockUserController = exports.blockUserController = exports.editUserController = exports.getAllUsersController = exports.adminLoginController = void 0;
 const adminUseCase_1 = require("../../../usecase/adminUseCase");
 const authUtils_1 = require("../../../infrastructure/utils/authUtils");
 const adminLoginController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -18,17 +18,19 @@ const adminLoginController = (req, res) => __awaiter(void 0, void 0, void 0, fun
         const adminUseCase = new adminUseCase_1.DefaultAdminUseCase();
         const tokenPair = yield adminUseCase.login(email, password);
         if (tokenPair) {
-            const accessToken = (0, authUtils_1.generateAccessToken)({ email }, 'admin');
+            const accessToken = (0, authUtils_1.generateAccessToken)({ email }, "admin");
             const admin = yield adminUseCase.getAdminByEmail(email);
-            res.status(200).json({ message: 'Admin login successful', admin, accessToken });
+            res
+                .status(200)
+                .json({ message: "Admin login successful", admin, accessToken });
         }
         else {
-            res.status(401).json({ error: 'Invalid credentials' });
+            res.status(401).json({ error: "Invalid credentials" });
         }
     }
     catch (error) {
-        console.error('Error in adminLoginController:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        console.error("Error in adminLoginController:", error);
+        res.status(500).json({ error: "Internal Server Error" });
     }
 });
 exports.adminLoginController = adminLoginController;
@@ -39,8 +41,8 @@ const getAllUsersController = (_req, res) => __awaiter(void 0, void 0, void 0, f
         res.status(200).json(users);
     }
     catch (error) {
-        console.error('Error in getAllUsersController:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        console.error("Error in getAllUsersController:", error);
+        res.status(500).json({ error: "Internal Server Error" });
     }
 });
 exports.getAllUsersController = getAllUsersController;
@@ -50,11 +52,11 @@ const editUserController = (req, res) => __awaiter(void 0, void 0, void 0, funct
         const updatedDetails = req.body;
         const adminUseCase = new adminUseCase_1.DefaultAdminUseCase();
         yield adminUseCase.editUserById(userId, updatedDetails);
-        res.status(200).json({ message: 'User updated successfully' });
+        res.status(200).json({ message: "User updated successfully" });
     }
     catch (error) {
-        console.error('Error in editUserController:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        console.error("Error in editUserController:", error);
+        res.status(500).json({ error: "Internal Server Error" });
     }
 });
 exports.editUserController = editUserController;
@@ -63,11 +65,11 @@ const blockUserController = (req, res) => __awaiter(void 0, void 0, void 0, func
         const { userId } = req.params;
         const adminUseCase = new adminUseCase_1.DefaultAdminUseCase();
         yield adminUseCase.blockUser(userId);
-        res.status(200).json({ message: 'User blocked successfully' });
+        res.status(200).json({ message: "User blocked successfully" });
     }
     catch (error) {
-        console.error('Error in blockUserController:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        console.error("Error in blockUserController:", error);
+        res.status(500).json({ error: "Internal Server Error" });
     }
 });
 exports.blockUserController = blockUserController;
@@ -76,11 +78,25 @@ const unblockUserController = (req, res) => __awaiter(void 0, void 0, void 0, fu
         const { userId } = req.params;
         const adminUseCase = new adminUseCase_1.DefaultAdminUseCase();
         yield adminUseCase.unblockUser(userId);
-        res.status(200).json({ message: 'User unblocked successfully' });
+        res.status(200).json({ message: "User unblocked successfully" });
     }
     catch (error) {
-        console.error('Error in unblockUserController:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        console.error("Error in unblockUserController:", error);
+        res.status(500).json({ error: "Internal Server Error" });
     }
 });
 exports.unblockUserController = unblockUserController;
+const RefundController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { userId, data } = req.body;
+        data.payment_method = data.paymentMethod;
+        const adminUseCase = new adminUseCase_1.DefaultAdminUseCase();
+        yield adminUseCase.addToWallet(userId, data.amount, data.payment_method);
+        res.status(200).json({ message: "refund successful" });
+    }
+    catch (error) {
+        console.error("Error creating checkout session:", error.message);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+exports.RefundController = RefundController;

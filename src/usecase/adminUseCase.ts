@@ -1,29 +1,34 @@
 // src/usecase/adminUseCase.ts
-import { AdminUseCase } from './interfaces/AdminUseCase';
-import AdminRepository from '../infrastructure/database/repositories/adminRepository';
-import UserRepository from '../infrastructure/database/repositories/userRepository';
-import { comparePasswords, generateAccessToken } from '../infrastructure/utils/authUtils';
-import { UserDocument } from '../domain/entities/User';
+import { AdminUseCase } from "./interfaces/AdminUseCase";
+import AdminRepository from "../infrastructure/database/repositories/adminRepository";
+import UserRepository from "../infrastructure/database/repositories/userRepository";
+import {
+  comparePasswords,
+  generateAccessToken,
+} from "../infrastructure/utils/authUtils";
+import { UserDocument } from "../domain/entities/User";
 
 export class DefaultAdminUseCase implements AdminUseCase {
-  async login(email: string, password: string): Promise<{ accessToken: string} | null> {
+  async login(
+    email: string,
+    password: string
+  ): Promise<{ accessToken: string } | null> {
     const admin = await AdminRepository.findOne({ email: email.toLowerCase() });
 
-    console.log('Admin:', admin);
-    console.log('Entered password:', password);
-    console.log('Hashed password in the database:', admin?.password);
+    console.log("Admin:", admin);
+    console.log("Entered password:", password);
+    console.log("Hashed password in the database:", admin?.password);
 
     if (admin) {
-      console.log('Entered password:', password);
-      console.log('Hashed password in the database:', admin.password);
+      console.log("Entered password:", password);
+      console.log("Hashed password in the database:", admin.password);
       const isPasswordMatch = await comparePasswords(password, admin.password);
-      console.log('Password match result:', isPasswordMatch);
+      console.log("Password match result:", isPasswordMatch);
 
       if (isPasswordMatch) {
-        // Passwords match, generate tokens
-        const accessToken = generateAccessToken(admin, 'admin');
+        const accessToken = generateAccessToken(admin, "admin");
 
-        return { accessToken};
+        return { accessToken };
       } else {
         return null;
       }
@@ -37,39 +42,38 @@ export class DefaultAdminUseCase implements AdminUseCase {
       const users = await UserRepository.find({});
       return users;
     } catch (error) {
-      console.error('Error getting all users:', error);
+      console.error("Error getting all users:", error);
       throw error;
     }
   }
 
-  async editUserById(userId: string, updatedDetails: Partial<UserDocument>): Promise<void> {
+  async editUserById(
+    userId: string,
+    updatedDetails: Partial<UserDocument>
+  ): Promise<void> {
     try {
       await UserRepository.findByIdAndUpdate(userId, updatedDetails);
     } catch (error) {
-      console.error('Error editing user:', error);
+      console.error("Error editing user:", error);
       throw error;
     }
   }
 
   async blockUser(userId: string): Promise<void> {
     try {
-      // Find the user by ID
       const user = await UserRepository.findOne({ _id: userId });
 
-      // Check if the user exists
       if (!user) {
         throw new Error(`User with ID ${userId} not found`);
       }
 
-      // Check if the user is already blocked
       if (user.blocked) {
         throw new Error(`User with ID ${userId} is already blocked`);
       }
 
-      // Update the user's blocked status to true
       await UserRepository.findByIdAndUpdate(userId, { blocked: true });
     } catch (error) {
-      console.error('Error blocking user:', error);
+      console.error("Error blocking user:", error);
       throw error;
     }
   }
@@ -78,24 +82,33 @@ export class DefaultAdminUseCase implements AdminUseCase {
   }
   async unblockUser(userId: string): Promise<void> {
     try {
-      // Find the user by ID
       const user = await UserRepository.findOne({ _id: userId });
 
-    
       if (!user) {
         throw new Error(`User with ID ${userId} not found`);
       }
 
-      // Check if the user is already unblocked
       if (!user.blocked) {
         throw new Error(`User with ID ${userId} is not blocked`);
       }
 
-      // Update the user's blocked status to false
       await UserRepository.findByIdAndUpdate(userId, { blocked: false });
     } catch (error) {
-      console.error('Error unblocking user:', error);
+      console.error("Error unblocking user:", error);
       throw error;
+    }
+  }
+
+  async addToWallet(
+    userId: string,
+    amount: number,
+    payment_method: string
+  ): Promise<void> {
+    try {
+      await UserRepository.updateWallet(userId, amount, payment_method);
+    } catch (error) {
+      console.error("Error updating user wallet:", error);
+      throw new Error("Error updating user wallet");
     }
   }
 }

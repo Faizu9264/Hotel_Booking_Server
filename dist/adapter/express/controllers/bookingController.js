@@ -22,7 +22,7 @@ const bookingRepository = new BookingRepository_1.BookingRepository();
 const bookingUseCase = new BookingUseCase_1.BookingUseCase(bookingRepository);
 const createBookingController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        console.log('createBookingController body', req.body);
+        console.log("createBookingController body", req.body);
         const bookingDetails = req.body.bookingDetails;
         const userId = req.body.userId;
         // Rearrange the data and remove roomDetails
@@ -41,8 +41,9 @@ const createBookingController = (req, res) => __awaiter(void 0, void 0, void 0, 
             maxPeople: bookingDetails.maxPeople,
             total: bookingDetails.total,
             discountPrice: bookingDetails.discountPrice,
-            paymentStatus: 'success',
-            BookingStatus: 'confirmed',
+            paymentStatus: "success",
+            BookingStatus: "confirmed",
+            paymentMethod: "stripe",
             RoomId: bookingDetails.roomDetails.id,
             HotelId: bookingDetails.roomDetails.hotelId,
             userId: userId,
@@ -51,8 +52,8 @@ const createBookingController = (req, res) => __awaiter(void 0, void 0, void 0, 
         res.status(201).json(createdBooking);
     }
     catch (error) {
-        console.error('Error creating booking:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        console.error("Error creating booking:", error);
+        res.status(500).json({ error: "Internal Server Error" });
     }
 });
 exports.createBookingController = createBookingController;
@@ -62,8 +63,8 @@ const getAllBookingsController = (_req, res) => __awaiter(void 0, void 0, void 0
         res.status(200).json(allBookings);
     }
     catch (error) {
-        console.error('Error getting all bookings:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        console.error("Error getting all bookings:", error);
+        res.status(500).json({ error: "Internal Server Error" });
     }
 });
 exports.getAllBookingsController = getAllBookingsController;
@@ -71,8 +72,8 @@ const handleWebhookEvent = (req, res) => __awaiter(void 0, void 0, void 0, funct
     try {
         const event = req.body;
         switch (event.type) {
-            case 'payment_intent.succeeded':
-                console.log('Payment successful');
+            case "payment_intent.succeeded":
+                console.log("Payment successful");
                 const { bookingDetails, userId } = req.app.locals.CheckoutBody;
                 yield (0, exports.createBookingController)({ body: { bookingDetails, userId } }, res);
                 break;
@@ -82,8 +83,8 @@ const handleWebhookEvent = (req, res) => __awaiter(void 0, void 0, void 0, funct
         res.send();
     }
     catch (error) {
-        console.error('Error handling webhook event:', error.message);
-        res.status(500).json({ error: 'Internal Server Error' });
+        console.error("Error handling webhook event:", error.message);
+        res.status(500).json({ error: "Internal Server Error" });
     }
 });
 exports.handleWebhookEvent = handleWebhookEvent;
@@ -94,12 +95,11 @@ const getBookingsByUserController = (req, res) => __awaiter(void 0, void 0, void
         res.status(200).json(userBookings);
     }
     catch (error) {
-        console.error('Error getting user bookings:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        console.error("Error getting user bookings:", error);
+        res.status(500).json({ error: "Internal Server Error" });
     }
 });
 exports.getBookingsByUserController = getBookingsByUserController;
-// src/adapter/express/controllers/bookingController.ts
 const cancelBookingController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
@@ -109,33 +109,33 @@ const cancelBookingController = (req, res) => __awaiter(void 0, void 0, void 0, 
         // Fetch the booking from the database
         const booking = yield bookingUseCase.getBookingById(bookingId);
         if (!booking) {
-            res.status(404).json({ error: 'Booking not found' });
+            res.status(404).json({ error: "Booking not found" });
             return;
         }
         // Check if the API call is from an admin
-        if ((user === null || user === void 0 ? void 0 : user.role) === 'admin') {
+        if ((user === null || user === void 0 ? void 0 : user.role) === "admin") {
             // Update the booking status to canceled by admin
-            booking.BookingStatus = 'canceled by admin';
+            booking.BookingStatus = "canceled by admin";
             // Save the updated booking
             yield bookingUseCase.updateBooking(booking);
-            res.status(200).json({ message: 'canceled by admin' });
+            res.status(200).json({ message: "canceled by admin" });
             return;
         }
         if (((_a = req.user) === null || _a === void 0 ? void 0 : _a.userId) === booking.userId) {
             // Update the booking status to canceled by user
-            booking.BookingStatus = 'canceled by user';
+            booking.BookingStatus = "canceled by user";
             // Save the updated booking
             yield bookingUseCase.updateBooking(booking);
-            res.status(200).json({ message: 'canceled by user' });
+            res.status(200).json({ message: "canceled by user" });
             return;
         }
         else {
-            res.status(403).json({ error: 'Permission denied' });
+            res.status(403).json({ error: "Permission denied" });
         }
     }
     catch (error) {
-        console.error('Error canceling booking by admin:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        console.error("Error canceling booking by admin:", error);
+        res.status(500).json({ error: "Internal Server Error" });
     }
 });
 exports.cancelBookingController = cancelBookingController;
@@ -144,24 +144,26 @@ const approveBookingController = (req, res) => __awaiter(void 0, void 0, void 0,
         const { user, params } = req;
         const { bookingId } = params;
         if (user) {
-            if (user.role !== 'admin') {
-                res.status(403).json({ error: 'Forbidden - Only admins can approve bookings' });
+            if (user.role !== "admin") {
+                res
+                    .status(403)
+                    .json({ error: "Forbidden - Only admins can approve bookings" });
                 return;
             }
         }
         // Fetch the booking by ID
         const booking = yield bookingUseCase.getBookingById(bookingId);
         if (!booking) {
-            res.status(404).json({ error: 'Booking not found' });
+            res.status(404).json({ error: "Booking not found" });
             return;
         }
-        booking.BookingStatus = 'approved by admin';
+        booking.BookingStatus = "approved by admin";
         const updatedBooking = yield bookingUseCase.updateBooking(booking);
         res.status(200).json(updatedBooking);
     }
     catch (error) {
-        console.error('Error approving booking:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        console.error("Error approving booking:", error);
+        res.status(500).json({ error: "Internal Server Error" });
     }
 });
 exports.approveBookingController = approveBookingController;

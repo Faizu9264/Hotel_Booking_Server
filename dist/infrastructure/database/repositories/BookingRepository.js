@@ -30,8 +30,8 @@ class BookingRepository {
                 .find()
                 .sort({ createdAt: -1 })
                 .populate({
-                path: 'RoomId',
-                model: 'Room',
+                path: "RoomId",
+                model: "Room",
             })
                 .lean()
                 .exec();
@@ -43,8 +43,8 @@ class BookingRepository {
             const userBookings = yield this.bookingModel
                 .find({ userId })
                 .populate({
-                path: 'RoomId',
-                model: 'Room',
+                path: "RoomId",
+                model: "Room",
             })
                 .lean()
                 .exec();

@@ -28,23 +28,27 @@ class RoomRepository {
     }
     getAllRooms() {
         return __awaiter(this, void 0, void 0, function* () {
-            const allRooms = yield this.roomModel.find().sort({ createdAt: -1 }).lean().exec();
+            const allRooms = yield this.roomModel
+                .find()
+                .sort({ createdAt: -1 })
+                .lean()
+                .exec();
             return allRooms;
         });
     }
     updateRoom(roomId, updatedDetails) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                console.log('Updated Details Before Update:', updatedDetails);
+                console.log("Updated Details Before Update:", updatedDetails);
                 const updatedRoom = yield this.roomModel
                     .findByIdAndUpdate(roomId, { $set: updatedDetails }, { new: true })
                     .lean()
                     .exec();
-                console.log('Updated Room:', updatedRoom);
+                console.log("Updated Room:", updatedRoom);
                 return updatedRoom;
             }
             catch (error) {
-                console.error('Error updating room:', error);
+                console.error("Error updating room:", error);
                 return null;
             }
         });

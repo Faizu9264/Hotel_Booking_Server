@@ -1,8 +1,7 @@
 // src/domain/entities/AdminEntity.ts
-import { Document } from 'mongoose';
+import { Document } from "mongoose";
 export interface AdminDocument extends Document {
   _id?: string;
-  // userId: string;
   email: string;
   password: string;
 }

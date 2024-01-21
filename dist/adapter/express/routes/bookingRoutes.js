@@ -9,6 +9,6 @@ const bookingController_1 = require("../controllers/bookingController");
 const tokenValidationMiddleware_1 = require("../middleware/tokenValidationMiddleware");
 const router = express_1.default.Router();
 router.use(tokenValidationMiddleware_1.tokenValidationMiddleware);
-router.post('/create', bookingController_1.createBookingController);
-router.get('/:userId', bookingController_1.getBookingsByUserController);
+router.post("/create", bookingController_1.createBookingController);
+router.get("/:userId", bookingController_1.getBookingsByUserController);
 exports.default = router;

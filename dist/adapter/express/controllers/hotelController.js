@@ -12,22 +12,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateHotelController = exports.getAllHotelsController = exports.createHotelController = void 0;
+exports.getAllReviewsController = exports.addReviewController = exports.updateHotelController = exports.getAllHotelsController = exports.createHotelController = void 0;
 const HotelUseCase_1 = require("../../../usecase/HotelUseCase");
 const HotelRepository_1 = require("../../../infrastructure/database/repositories/HotelRepository");
 const hotelModel_1 = __importDefault(require("../../../infrastructure/database/models/hotelModel"));
+const Review_1 = require("../../../domain/entities/Review");
 const hotelRepository = new HotelRepository_1.HotelRepository(hotelModel_1.default);
 const hotelUseCase = new HotelUseCase_1.HotelUseCase(hotelRepository);
 const createHotelController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const hotelDetails = req.body;
-        console.log('hotelDetail', hotelDetails);
+        console.log("hotelDetail", hotelDetails);
         const createdHotel = yield hotelUseCase.createHotel(hotelDetails);
         res.status(201).json(createdHotel);
     }
     catch (error) {
-        console.error('Error creating hotel:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        console.error("Error creating hotel:", error);
+        res.status(500).json({ error: "Internal Server Error" });
     }
 });
 exports.createHotelController = createHotelController;
@@ -37,8 +38,8 @@ const getAllHotelsController = (_req, res) => __awaiter(void 0, void 0, void 0, 
         res.status(200).json(allHotels);
     }
     catch (error) {
-        console.error('Error getting hotels:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        console.error("Error getting hotels:", error);
+        res.status(500).json({ error: "Internal Server Error" });
     }
 });
 exports.getAllHotelsController = getAllHotelsController;
@@ -55,12 +56,43 @@ const updateHotelController = (req, res) => __awaiter(void 0, void 0, void 0, fu
             res.status(200).json(updatedHotel);
         }
         else {
-            res.status(404).json({ error: 'Hotel not found' });
+            res.status(404).json({ error: "Hotel not found" });
         }
     }
     catch (error) {
-        console.error('Error updating hotel:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        console.error("Error updating hotel:", error);
+        res.status(500).json({ error: "Internal Server Error" });
     }
 });
 exports.updateHotelController = updateHotelController;
+const addReviewController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { hotelId } = req.params;
+        const reviewDetails = req.body;
+        console.log("reviewDetails", reviewDetails);
+        const review = new Review_1.Review(reviewDetails.userId, reviewDetails.rating, reviewDetails.comment, reviewDetails.reviewText, hotelId, new Date());
+        const updatedHotel = yield hotelUseCase.addReview(hotelId, review);
+        if (updatedHotel) {
+            res.status(200).json(updatedHotel);
+        }
+        else {
+            res.status(404).json({ error: "Hotel not found" });
+        }
+    }
+    catch (error) {
+        console.error("Error adding review:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+exports.addReviewController = addReviewController;
+const getAllReviewsController = (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const allReviews = yield hotelUseCase.getAllReviews();
+        res.status(200).json(allReviews);
+    }
+    catch (error) {
+        console.error("Error getting reviews:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+exports.getAllReviewsController = getAllReviewsController;

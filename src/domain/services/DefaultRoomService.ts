@@ -1,12 +1,14 @@
 // src/domain/services/DefaultRoomService.ts
-import { inject, injectable } from 'inversify';
-import { RoomRepository } from '../../infrastructure/database/repositories/RoomRepository';
-import { RoomService } from './RoomService';
-import { Room } from '../entities/Room';
+import { inject, injectable } from "inversify";
+import { RoomRepository } from "../../infrastructure/database/repositories/RoomRepository";
+import { RoomService } from "./RoomService";
+import { Room } from "../entities/Room";
 
 @injectable()
 export class DefaultRoomService implements RoomService {
-  constructor(@inject('RoomRepository') private readonly roomRepository: RoomRepository) {}
+  constructor(
+    @inject("RoomRepository") private readonly roomRepository: RoomRepository
+  ) {}
 
   async createRoom(room: Room): Promise<Room> {
     return this.roomRepository.createRoom(room);
@@ -20,7 +22,10 @@ export class DefaultRoomService implements RoomService {
     return this.roomRepository.getAllRooms();
   }
 
-  async updateRoom(roomId: string, updatedDetails: Partial<Room>): Promise<Room | null> {
+  async updateRoom(
+    roomId: string,
+    updatedDetails: Partial<Room>
+  ): Promise<Room | null> {
     return this.roomRepository.updateRoom(roomId, updatedDetails);
   }
 

@@ -38,4 +38,4 @@ const roomSchema = new mongoose_1.Schema({
     images: { type: [String], default: [] },
     createdAt: { type: Date, default: Date.now },
 });
-exports.default = mongoose_1.default.model('Room', roomSchema);
+exports.default = mongoose_1.default.model("Room", roomSchema);

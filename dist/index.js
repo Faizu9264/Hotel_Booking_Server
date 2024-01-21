@@ -7,8 +7,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 require("reflect-metadata");
 const app_1 = __importDefault(require("./adapter/express/app"));
 const config_1 = require("./infrastructure/config");
-require('dotenv').config();
-// Connect to MongoDB
+require("dotenv").config();
 (0, config_1.connectToDatabase)();
 const PORT = process.env.PORT || 5000;
 app_1.default.listen(PORT, () => {

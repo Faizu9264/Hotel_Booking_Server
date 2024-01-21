@@ -58,6 +58,6 @@ let DefaultRoomService = class DefaultRoomService {
 exports.DefaultRoomService = DefaultRoomService;
 exports.DefaultRoomService = DefaultRoomService = __decorate([
     (0, inversify_1.injectable)(),
-    __param(0, (0, inversify_1.inject)('RoomRepository')),
+    __param(0, (0, inversify_1.inject)("RoomRepository")),
     __metadata("design:paramtypes", [RoomRepository_1.RoomRepository])
 ], DefaultRoomService);

@@ -1,6 +1,6 @@
 // src/infrastructure/database/repositories/RoomRepository.ts
-import { Model, Document } from 'mongoose';
-import { Room } from '../../../domain/entities/Room';
+import { Model, Document } from "mongoose";
+import { Room } from "../../../domain/entities/Room";
 
 export class RoomRepository {
   private readonly roomModel: Model<Document & Room>;
@@ -20,33 +20,37 @@ export class RoomRepository {
   }
 
   async getAllRooms(): Promise<Room[]> {
-    const allRooms = await this.roomModel.find().sort({ createdAt: -1 }).lean().exec();
+    const allRooms = await this.roomModel
+      .find()
+      .sort({ createdAt: -1 })
+      .lean()
+      .exec();
     return allRooms as Room[];
   }
 
-  async updateRoom(roomId: string, updatedDetails: Partial<Room>): Promise<Room | null> {
+  async updateRoom(
+    roomId: string,
+    updatedDetails: Partial<Room>
+  ): Promise<Room | null> {
     try {
-      console.log('Updated Details Before Update:', updatedDetails);
-      
+      console.log("Updated Details Before Update:", updatedDetails);
+
       const updatedRoom = await this.roomModel
         .findByIdAndUpdate(roomId, { $set: updatedDetails }, { new: true })
         .lean()
         .exec();
-  
-      console.log('Updated Room:', updatedRoom);
-  
+
+      console.log("Updated Room:", updatedRoom);
+
       return updatedRoom as Room | null;
     } catch (error) {
-      console.error('Error updating room:', error);
+      console.error("Error updating room:", error);
       return null;
     }
   }
-  
-  
 
   async getRoomsByHotelId(hotelId: string): Promise<Room[]> {
     const rooms = await this.roomModel.find({ hotelId }).lean().exec();
     return rooms as Room[];
   }
 }
-

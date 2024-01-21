@@ -1,11 +1,13 @@
 // src/usecase/RoomUseCase.ts
-import { inject, injectable } from 'inversify';
-import { RoomService } from '../domain/services/RoomService';
-import { Room } from '../domain/entities/Room';
+import { inject, injectable } from "inversify";
+import { RoomService } from "../domain/services/RoomService";
+import { Room } from "../domain/entities/Room";
 
 @injectable()
 export class RoomUseCase {
-  constructor(@inject('RoomService') private readonly roomService: RoomService) {}
+  constructor(
+    @inject("RoomService") private readonly roomService: RoomService
+  ) {}
 
   async createRoom(room: Room): Promise<Room> {
     return this.roomService.createRoom(room);
@@ -19,7 +21,10 @@ export class RoomUseCase {
     return this.roomService.getAllRooms();
   }
 
-  async updateRoom(roomId: string, updatedDetails: Partial<Room>): Promise<Room | null> {
+  async updateRoom(
+    roomId: string,
+    updatedDetails: Partial<Room>
+  ): Promise<Room | null> {
     return this.roomService.updateRoom(roomId, updatedDetails);
   }
 

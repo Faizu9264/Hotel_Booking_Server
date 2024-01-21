@@ -25,8 +25,8 @@ const createRoomController = (req, res) => __awaiter(void 0, void 0, void 0, fun
         res.status(201).json(createdRoom);
     }
     catch (error) {
-        console.error('Error creating room:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        console.error("Error creating room:", error);
+        res.status(500).json({ error: "Internal Server Error" });
     }
 });
 exports.createRoomController = createRoomController;
@@ -38,12 +38,12 @@ const getRoomByIdController = (req, res) => __awaiter(void 0, void 0, void 0, fu
             res.status(200).json(room);
         }
         else {
-            res.status(404).json({ error: 'Room not found' });
+            res.status(404).json({ error: "Room not found" });
         }
     }
     catch (error) {
-        console.error('Error getting room by ID:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        console.error("Error getting room by ID:", error);
+        res.status(500).json({ error: "Internal Server Error" });
     }
 });
 exports.getRoomByIdController = getRoomByIdController;
@@ -53,8 +53,8 @@ const getAllRoomsController = (_req, res) => __awaiter(void 0, void 0, void 0, f
         res.status(200).json(allRooms);
     }
     catch (error) {
-        console.error('Error getting all rooms:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        console.error("Error getting all rooms:", error);
+        res.status(500).json({ error: "Internal Server Error" });
     }
 });
 exports.getAllRoomsController = getAllRoomsController;
@@ -77,12 +77,12 @@ const updateRoomController = (req, res) => __awaiter(void 0, void 0, void 0, fun
             res.status(200).json(updatedRoom);
         }
         else {
-            res.status(404).json({ error: 'Room not found' });
+            res.status(404).json({ error: "Room not found" });
         }
     }
     catch (error) {
-        console.error('Error updating room:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        console.error("Error updating room:", error);
+        res.status(500).json({ error: "Internal Server Error" });
     }
 });
 exports.updateRoomController = updateRoomController;
@@ -94,12 +94,12 @@ const getRoomsByHotelIdController = (req, res) => __awaiter(void 0, void 0, void
             res.status(200).json(rooms);
         }
         else {
-            res.status(404).json({ error: 'No rooms found for the given hotelId' });
+            res.status(404).json({ error: "No rooms found for the given hotelId" });
         }
     }
     catch (error) {
-        console.error('Error getting rooms by hotelId:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        console.error("Error getting rooms by hotelId:", error);
+        res.status(500).json({ error: "Internal Server Error" });
     }
 });
 exports.getRoomsByHotelIdController = getRoomsByHotelIdController;

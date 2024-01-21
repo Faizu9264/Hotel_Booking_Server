@@ -57,6 +57,6 @@ let RoomUseCase = class RoomUseCase {
 exports.RoomUseCase = RoomUseCase;
 exports.RoomUseCase = RoomUseCase = __decorate([
     (0, inversify_1.injectable)(),
-    __param(0, (0, inversify_1.inject)('RoomService')),
+    __param(0, (0, inversify_1.inject)("RoomService")),
     __metadata("design:paramtypes", [Object])
 ], RoomUseCase);

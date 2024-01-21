@@ -44,10 +44,20 @@ let DefaultHotelService = class DefaultHotelService {
             return this.hotelRepository.updateHotel(hotelId, updatedDetails);
         });
     }
+    addReview(hotelId, review) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.hotelRepository.addReview(hotelId, review);
+        });
+    }
+    getAllReviews() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.hotelRepository.getAllReviews();
+        });
+    }
 };
 exports.DefaultHotelService = DefaultHotelService;
 exports.DefaultHotelService = DefaultHotelService = __decorate([
     (0, inversify_1.injectable)(),
-    __param(0, (0, inversify_1.inject)('HotelRepository')),
+    __param(0, (0, inversify_1.inject)("HotelRepository")),
     __metadata("design:paramtypes", [HotelRepository_1.HotelRepository])
 ], DefaultHotelService);

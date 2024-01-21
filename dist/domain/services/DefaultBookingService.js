@@ -58,6 +58,6 @@ let DefaultBookingService = class DefaultBookingService {
 exports.DefaultBookingService = DefaultBookingService;
 exports.DefaultBookingService = DefaultBookingService = __decorate([
     (0, inversify_1.injectable)(),
-    __param(0, (0, inversify_1.inject)('BookingRepository')),
+    __param(0, (0, inversify_1.inject)("BookingRepository")),
     __metadata("design:paramtypes", [BookingRepository_1.BookingRepository])
 ], DefaultBookingService);

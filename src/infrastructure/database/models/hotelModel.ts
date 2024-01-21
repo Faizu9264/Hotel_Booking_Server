@@ -1,6 +1,14 @@
 // src/infrastructure/database/models/hotelModel.ts
-import mongoose, { Schema, Document } from 'mongoose';
-import { Hotel } from '../../../domain/entities/Hotel';
+import mongoose, { Schema, Document } from "mongoose";
+import { Hotel } from "../../../domain/entities/Hotel";
+
+const reviewSchema = new Schema({
+  userId: { type: String, required: true },
+  rating: { type: Number, required: true },
+  comment: { type: String, required: true },
+  reviewText: { type: String, required: true },
+  date: { type: Date, default: Date.now },
+});
 
 const hotelSchema = new Schema({
   location: {
@@ -15,8 +23,9 @@ const hotelSchema = new Schema({
     emailAddress: { type: String, required: true },
     description: { type: String, required: true },
   },
-  images: { type: [String], default: [] }, 
+  images: { type: [String], default: [] },
+  reviews: { type: [reviewSchema], default: [] },
   createdAt: { type: Date, default: Date.now },
 });
 
-export default mongoose.model<Document & Hotel>('Hotel', hotelSchema);
+export default mongoose.model<Document & Hotel>("Hotel", hotelSchema);

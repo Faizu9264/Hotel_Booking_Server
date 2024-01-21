@@ -22,10 +22,12 @@ class SocketManager {
             socket.on("blocked", ({ userId }) => __awaiter(this, void 0, void 0, function* () {
                 let blockedUser = this.getUser(userId);
                 let user = yield this.userRepository.findOne({ _id: userId });
-                console.log('user', user);
-                console.log('blockedUser ', blockedUser);
+                console.log("user", user);
+                console.log("blockedUser ", blockedUser);
                 if (user && user._id && blockedUser) {
-                    this.io.to(blockedUser.socketId).emit("responseIsBlocked", { blocked: user.blocked });
+                    this.io
+                        .to(blockedUser.socketId)
+                        .emit("responseIsBlocked", { blocked: user.blocked });
                 }
             }));
             socket.on("disconnect", () => {

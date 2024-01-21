@@ -57,6 +57,6 @@ let BookingUseCase = class BookingUseCase {
 exports.BookingUseCase = BookingUseCase;
 exports.BookingUseCase = BookingUseCase = __decorate([
     (0, inversify_1.injectable)(),
-    __param(0, (0, inversify_1.inject)('BookingService')),
+    __param(0, (0, inversify_1.inject)("BookingService")),
     __metadata("design:paramtypes", [Object])
 ], BookingUseCase);
