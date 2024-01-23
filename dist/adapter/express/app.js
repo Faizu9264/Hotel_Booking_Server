@@ -23,7 +23,7 @@ dotenv_1.default.config();
 require("dotenv").config();
 app.use((0, morgan_1.default)("dev"));
 app.use((0, cors_1.default)({
-    origin: process.env.USER_DOMAIN ,
+    origin: process.env.USER_DOMAIN,
     credentials: true,
 }));
 app.use(express_1.default.json());
@@ -42,7 +42,7 @@ app.get("/", (req, res) => {
     res.send("Welcome to the homepage!");
 });
 app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "http://localhost:3000");
+    res.header("Access-Control-Allow-Origin", process.env.USER_DOMAIN);
     res.header("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     res.header("Access-Control-Allow-Credentials", "true");

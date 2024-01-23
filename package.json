@@ -6,7 +6,8 @@
   "scripts": {
     "start": "concurrently \"npm run compile:watch\" \"npm run start:dev\"",
     "compile:watch": "tsc -w",
-    "start:dev": "ts-node-dev --watch src/index.ts"
+    "start:dev": "ts-node-dev --watch --respawn --transpile-only src/index.ts",
+    "build": "tsc"
   },
   "keywords": [],
   "author": "",

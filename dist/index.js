@@ -11,5 +11,5 @@ require("dotenv").config();
 (0, config_1.connectToDatabase)();
 const PORT = process.env.PORT || 5000;
 app_1.default.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+    console.log(`Server is running on ${process.env.USER_DOMAIN}:${PORT}`);
 });

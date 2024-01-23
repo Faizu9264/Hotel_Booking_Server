@@ -9,9 +9,9 @@ import { tokenValidationMiddleware } from "../middleware/tokenValidationMiddlewa
 
 const router = express.Router();
 
+router.get("/all", getAllHotelsController);
 router.use(tokenValidationMiddleware);
 router.patch("/update/:hotelId", updateHotelController);
 router.post("/create", createHotelController);
-router.get("/all", getAllHotelsController);
 
 export default router;
