@@ -7,6 +7,7 @@ import { BookingUseCase } from "../../../usecase/BookingUseCase";
 import { BookingRepository } from "../../../infrastructure/database/repositories/BookingRepository";
 import { Types } from "mongoose";
 import { Booking } from "../../../domain/entities/Booking";
+import { Document } from "mongoose";
 
 const otpRepository = new InMemoryOTPRepository();
 const otpService = new DefaultOTPService(otpRepository);
