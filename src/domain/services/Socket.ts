@@ -16,12 +16,12 @@ export class SocketManager {
   constructor(httpServer: HttpServer, userRepository: typeof UserRepository) {
     this.httpServer = httpServer;
     this.userRepository = userRepository;
-    this.io = new Server(httpServer);
-// , {
-//       cors: {
-//         origin: process.env.CLIENT_URL,
-//       },
-//     }
+    this.io = new Server(httpServer, {
+      cors: {
+        origin: process.env.CLIENT_URL,
+      },
+    });
+
     this.io.on("connection", this.handleConnection);
   }
 
