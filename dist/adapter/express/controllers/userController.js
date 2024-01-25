@@ -128,13 +128,10 @@ const loginController = (req, res) => __awaiter(void 0, void 0, void 0, function
 });
 exports.loginController = loginController;
 const googleLoginController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log("inside googleLoginController");
     try {
         const { _id, email, username, token } = req.body;
-        console.log("email, username,token", email, username, token);
         const userUseCase = new userUseCase_1.DefaultUserUseCase();
         const existingUser = yield userUseCase.getUserByEmail(email);
-        console.log("existingUser", existingUser);
         if (existingUser) {
             const accessToken = (0, authUtils_1.generateAccessToken)(existingUser, "user");
             const user = yield userUseCase.getUserByEmail(email);
@@ -157,7 +154,6 @@ const googleLoginController = (req, res) => __awaiter(void 0, void 0, void 0, fu
             });
         }
         else {
-            // Use the token as the user ID
             const newUser = { _id: _id, email, username, password: token };
             yield userUseCase.createUserAfterVerification(newUser);
             const getUser = yield userUseCase.getUserByEmail(email);

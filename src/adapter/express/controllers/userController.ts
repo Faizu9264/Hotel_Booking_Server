@@ -142,16 +142,13 @@ export const googleLoginController = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  console.log("inside googleLoginController");
 
   try {
     const { _id, email, username, token } = req.body;
-    console.log("email, username,token", email, username, token);
 
     const userUseCase = new DefaultUserUseCase();
 
     const existingUser = await userUseCase.getUserByEmail(email);
-    console.log("existingUser", existingUser);
 
     if (existingUser) {
       const accessToken = generateAccessToken(existingUser, "user");
@@ -175,7 +172,6 @@ export const googleLoginController = async (
         },
       });
     } else {
-      // Use the token as the user ID
       const newUser = { _id: _id, email, username, password: token };
 
       await userUseCase.createUserAfterVerification(newUser as any);
