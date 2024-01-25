@@ -8,7 +8,6 @@ const express_1 = __importDefault(require("express"));
 const hotelController_1 = require("../controllers/hotelController");
 const tokenValidationMiddleware_1 = require("../middleware/tokenValidationMiddleware");
 const router = express_1.default.Router();
-router.get("/all", hotelController_1.getAllHotelsController);
 router.use(tokenValidationMiddleware_1.tokenValidationMiddleware);
 router.patch("/update/:hotelId", hotelController_1.updateHotelController);
 router.post("/create", hotelController_1.createHotelController);

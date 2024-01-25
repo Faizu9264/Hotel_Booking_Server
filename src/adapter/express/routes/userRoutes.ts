@@ -24,6 +24,7 @@ import { handleWebhookEvent } from "../controllers/bookingController";
 import { getAllCouponsController } from "../controllers/couponController";
 import {
   addReviewController,
+  getAllHotelsController,
   getAllReviewsController,
 } from "../controllers/hotelController";
 
@@ -43,6 +44,7 @@ router.post("/reset-password", resetPasswordController);
 router.post("/webhook", handleWebhookEvent);
 router.post("/webhook-addtowallet", AddToWalletWebhook);
 router.get("/all-reviews", getAllReviewsController);
+router.get("/hotel/all", getAllHotelsController);
 router.use(tokenValidationMiddleware);
 router.patch("/:userId/update-profile", updateProfileController);
 router.patch("/:userId/change-password", changePasswordController);
